@@ -20,6 +20,35 @@ void signal_handler(int signal) {
   running = false;
 }
 
+// Template function to handle message printing and counting
+template <typename MessageT>
+void subscribe_and_print(std::shared_ptr<larcs::runtime::ZenohTransport> transport,
+                        const std::string& topic, int count,
+                        std::atomic<int>& received_count) {
+  auto sub = std::make_shared<larcs::runtime::Subscriber<MessageT>>(
+      transport, topic, [&](const MessageT& msg) {
+        std::string json_output;
+        google::protobuf::util::JsonPrintOptions options;
+        options.add_whitespace = false;
+        auto status =
+            google::protobuf::util::MessageToJsonString(msg, &json_output, options);
+        if (status.ok()) {
+          fmt::print("{}\n", json_output);
+        } else {
+          fmt::print(stderr, "Error converting message to JSON\n");
+        }
+
+        received_count++;
+        if (count > 0 && received_count >= count) {
+          running = false;
+        }
+      });
+
+  while (running) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+}
+
 int main(int argc, char* argv[]) {
   CLI::App app{"LARCS Subscriber - Subscribe to messages from a topic"};
 
@@ -68,79 +97,13 @@ int main(int argc, char* argv[]) {
 
   std::atomic<int> received_count{0};
 
+  // Subscribe based on message type
   if (message_type == "Twist") {
-    auto sub = std::make_shared<larcs::runtime::Subscriber<larcs::msgs::Twist>>(
-        transport, topic, [&](const larcs::msgs::Twist& msg) {
-          std::string json_output;
-          google::protobuf::util::JsonPrintOptions options;
-          options.add_whitespace = false;
-          auto status =
-              google::protobuf::util::MessageToJsonString(msg, &json_output, options);
-          if (status.ok()) {
-            fmt::print("{}\n", json_output);
-          } else {
-            fmt::print(stderr, "Error converting message to JSON\n");
-          }
-
-          received_count++;
-          if (count > 0 && received_count >= count) {
-            running = false;
-          }
-        });
-
-    while (running) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
-
+    subscribe_and_print<larcs::msgs::Twist>(transport, topic, count, received_count);
   } else if (message_type == "Pose") {
-    auto sub = std::make_shared<larcs::runtime::Subscriber<larcs::msgs::Pose>>(
-        transport, topic, [&](const larcs::msgs::Pose& msg) {
-          std::string json_output;
-          google::protobuf::util::JsonPrintOptions options;
-          options.add_whitespace = false;
-          auto status =
-              google::protobuf::util::MessageToJsonString(msg, &json_output, options);
-          if (status.ok()) {
-            fmt::print("{}\n", json_output);
-          } else {
-            fmt::print(stderr, "Error converting message to JSON\n");
-          }
-
-          received_count++;
-          if (count > 0 && received_count >= count) {
-            running = false;
-          }
-        });
-
-    while (running) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
-
+    subscribe_and_print<larcs::msgs::Pose>(transport, topic, count, received_count);
   } else if (message_type == "Vector3") {
-    auto sub =
-        std::make_shared<larcs::runtime::Subscriber<larcs::msgs::Vector3>>(
-            transport, topic, [&](const larcs::msgs::Vector3& msg) {
-              std::string json_output;
-              google::protobuf::util::JsonPrintOptions options;
-              options.add_whitespace = false;
-              auto status = google::protobuf::util::MessageToJsonString(
-                  msg, &json_output, options);
-              if (status.ok()) {
-                fmt::print("{}\n", json_output);
-              } else {
-                fmt::print(stderr, "Error converting message to JSON\n");
-              }
-
-              received_count++;
-              if (count > 0 && received_count >= count) {
-                running = false;
-              }
-            });
-
-    while (running) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
-
+    subscribe_and_print<larcs::msgs::Vector3>(transport, topic, count, received_count);
   } else {
     fmt::print(stderr, "Error: Unsupported message type: {}\n", message_type);
     return 1;

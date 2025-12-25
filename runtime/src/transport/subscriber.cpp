@@ -38,8 +38,11 @@ Subscriber<MessageT>::Subscriber(std::shared_ptr<ZenohTransport> transport,
   context->callback = callback_;
   context->topic = topic_;
 
-  // Create closure for Zenoh callback
-  z_owned_closure_sample_t closure = z_closure(zenoh_callback, nullptr, context);
+  // Create closure for Zenoh callback with proper cleanup
+  auto drop_callback = [](void* ctx) {
+    delete static_cast<SubscriberContext<MessageT>*>(ctx);
+  };
+  z_owned_closure_sample_t closure = z_closure(zenoh_callback, drop_callback, context);
 
   // Declare subscriber
   subscriber_ = z_declare_subscriber(z_loan(transport_->session()),
@@ -59,8 +62,6 @@ Subscriber<MessageT>::Subscriber(std::shared_ptr<ZenohTransport> transport,
 template <typename MessageT>
 Subscriber<MessageT>::~Subscriber() {
   if (z_check(subscriber_)) {
-    // Get context before undeclaring
-    // Note: The context will be deleted by Zenoh's drop callback
     z_undeclare_subscriber(z_move(subscriber_));
     spdlog::debug("Subscriber destroyed for topic: {}", topic_);
   }

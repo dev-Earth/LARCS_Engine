@@ -67,7 +67,7 @@ source "$HOME/.cargo/env"
 3. **Install Zenoh**
 ```bash
 # Download and build Zenoh C library
-ZENOH_VERSION=1.0.6
+ZENOH_VERSION=1.7.1
 curl -L https://github.com/eclipse-zenoh/zenoh-c/archive/refs/tags/${ZENOH_VERSION}.tar.gz | tar xz
 cd zenoh-c-${ZENOH_VERSION}
 mkdir build && cd build

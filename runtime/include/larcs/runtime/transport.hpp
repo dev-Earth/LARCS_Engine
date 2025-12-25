@@ -5,9 +5,9 @@
 namespace larcs::runtime {
 
 enum class QoSProfile {
-  Control,      // 高信頼、低遅延（軌道、指令、E-stop）
-  Telemetry,    // 最新優先（状態、統計）
-  Perception    // ベストエフォート、大容量（点群、画像）
+  Control,      // High reliability, low latency (trajectory, commands, E-stop)
+  Telemetry,    // Latest value priority (state, statistics)
+  Perception    // Best effort, large data (point clouds, images)
 };
 
 class Transport {
