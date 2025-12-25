@@ -40,7 +40,8 @@ jobs:
           tar \
           pkg-config \
           clang-format \
-          clang-tidy
+          clang-tidy \
+          libclang-dev
         
         # Install specific compilers if needed
         if [ "${{ matrix.compiler.name }}" = "gcc" ]; then

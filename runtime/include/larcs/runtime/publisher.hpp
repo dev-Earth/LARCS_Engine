@@ -1,16 +1,21 @@
 #pragma once
 
-#include <functional>
+#include "larcs/runtime/transport.hpp"
+#include "larcs/runtime/zenoh_transport.hpp"
+
+#include <google/protobuf/message.h>
+#include <zenoh.h>
+
 #include <memory>
 #include <string>
 
 namespace larcs::runtime {
 
-// Publisher skeleton - to be extended with actual implementation
-template <typename MessageType>
+template <typename MessageT>
 class Publisher {
  public:
-  explicit Publisher(const std::string& topic_name);
+  Publisher(std::shared_ptr<ZenohTransport> transport,
+            const std::string& topic, QoSProfile qos = QoSProfile::Telemetry);
   ~Publisher();
 
   // Delete copy constructor and assignment
@@ -21,15 +26,14 @@ class Publisher {
   Publisher(Publisher&&) noexcept = default;
   Publisher& operator=(Publisher&&) noexcept = default;
 
-  // Publish a message
-  void Publish(const MessageType& message);
-
-  // Get topic name
-  std::string GetTopicName() const;
+  bool publish(const MessageT& msg);
+  const std::string& topic() const { return topic_; }
 
  private:
-  struct Impl;
-  std::unique_ptr<Impl> impl_;
+  std::shared_ptr<ZenohTransport> transport_;
+  std::string topic_;
+  QoSProfile qos_;
+  z_owned_publisher_t publisher_;
 };
 
 }  // namespace larcs::runtime

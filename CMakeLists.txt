@@ -18,6 +18,7 @@ find_package(spdlog CONFIG REQUIRED)
 find_package(Protobuf CONFIG REQUIRED)
 find_package(CLI11 CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
+find_package(zenohc CONFIG REQUIRED)
 
 # Enable testing
 enable_testing()

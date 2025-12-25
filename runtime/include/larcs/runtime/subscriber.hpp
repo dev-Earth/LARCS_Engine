@@ -1,18 +1,25 @@
 #pragma once
 
+#include "larcs/runtime/transport.hpp"
+#include "larcs/runtime/zenoh_transport.hpp"
+
+#include <google/protobuf/message.h>
+#include <zenoh.h>
+
 #include <functional>
 #include <memory>
 #include <string>
 
 namespace larcs::runtime {
 
-// Subscriber skeleton - to be extended with actual implementation
-template <typename MessageType>
+template <typename MessageT>
 class Subscriber {
  public:
-  using CallbackType = std::function<void(const MessageType&)>;
+  using CallbackType = std::function<void(const MessageT&)>;
 
-  Subscriber(const std::string& topic_name, CallbackType callback);
+  Subscriber(std::shared_ptr<ZenohTransport> transport,
+             const std::string& topic, CallbackType callback,
+             QoSProfile qos = QoSProfile::Telemetry);
   ~Subscriber();
 
   // Delete copy constructor and assignment
@@ -23,12 +30,16 @@ class Subscriber {
   Subscriber(Subscriber&&) noexcept = default;
   Subscriber& operator=(Subscriber&&) noexcept = default;
 
-  // Get topic name
-  std::string GetTopicName() const;
+  const std::string& topic() const { return topic_; }
 
  private:
-  struct Impl;
-  std::unique_ptr<Impl> impl_;
+  static void zenoh_callback(const z_sample_t* sample, void* context);
+
+  std::shared_ptr<ZenohTransport> transport_;
+  std::string topic_;
+  CallbackType callback_;
+  QoSProfile qos_;
+  z_owned_subscriber_t subscriber_;
 };
 
 }  // namespace larcs::runtime
