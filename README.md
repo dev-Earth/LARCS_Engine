@@ -48,6 +48,7 @@ LARCS Engine provides a lightweight, high-performance foundation for building au
 - GCC 13+ or Clang 17+
 - CMake 3.25+
 - vcpkg (installed below)
+- Rust toolchain (for building Zenoh)
 
 ### Installation
 
@@ -57,7 +58,27 @@ sudo apt update
 sudo apt install -y build-essential cmake ninja-build git curl zip unzip tar
 ```
 
-2. **Install vcpkg**
+2. **Install Rust (for Zenoh)**
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source "$HOME/.cargo/env"
+```
+
+3. **Install Zenoh**
+```bash
+# Download and build Zenoh C library
+ZENOH_VERSION=1.0.6
+curl -L https://github.com/eclipse-zenoh/zenoh-c/archive/refs/tags/${ZENOH_VERSION}.tar.gz | tar xz
+cd zenoh-c-${ZENOH_VERSION}
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make -j$(nproc)
+sudo make install
+sudo ldconfig
+cd ../..
+```
+
+4. **Install vcpkg**
 ```bash
 cd ~
 git clone https://github.com/microsoft/vcpkg.git
@@ -67,7 +88,7 @@ export VCPKG_ROOT=~/vcpkg
 export PATH=$VCPKG_ROOT:$PATH
 ```
 
-3. **Clone and Build**
+5. **Clone and Build**
 ```bash
 git clone https://github.com/dev-Earth/LARCS_Engine.git
 cd LARCS_Engine
@@ -75,7 +96,7 @@ cmake --preset default
 cmake --build build/default
 ```
 
-4. **Run Tests**
+6. **Run Tests**
 ```bash
 cd build/default
 ctest --output-on-failure

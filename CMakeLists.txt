@@ -9,6 +9,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Export compile commands for IDE support
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Add custom module path
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
+
 # Include common CMake functions
 include(cmake/larcs.cmake)
 
@@ -18,7 +21,7 @@ find_package(spdlog CONFIG REQUIRED)
 find_package(Protobuf CONFIG REQUIRED)
 find_package(CLI11 CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
-find_package(zenohc CONFIG REQUIRED)
+find_package(Zenoh REQUIRED)
 
 # Enable testing
 enable_testing()

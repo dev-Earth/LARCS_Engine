@@ -19,7 +19,7 @@ set(RUNTIME_HEADERS
 )
 
 # Find Zenoh
-find_package(zenohc CONFIG REQUIRED)
+find_package(Zenoh REQUIRED)
 
 # Create runtime library
 larcs_add_library(larcs-runtime
