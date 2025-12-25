@@ -1,6 +1,13 @@
-# LARCS Engine
+# **Learning Autonomous Robot Control System Engine**
 
-**LARCS** (Autonomous Robot Competition System) - A modular, ROS-independent framework for developing and deploying autonomous robot systems.
+### 概要
+#### LARCS（Learning Autonomous Robot Control System Engine）は、自律型ロボットの制御システムを学習・開発するための統合3Dエンジンです。LARCSは、ロボットの動作をシミュレーションし、強化学習アルゴリズムを用いて最適な制御戦略を学習することができます。
+
+### 主な特徴
+- **3Dシミュレーション環境**: 高度な3Dグラフィックスと物理エンジンを備えたシミュレーション環境を提供します。
+    - **強化学習アルゴリズム**: Q学習、Deep Q-Networks（DQN）、Proximal Policy Optimization（PPO）など、様々な強化学習アルゴリズムをサポートしています。
+    - **モジュール式設計**: ロボットのセンサー、アクチュエーター、制御アルゴリズムを簡単に追加・交換できるモジュール式設計を採用しています。
+    - **リアルタイムデータ解析**: ロボットの動作データをリアルタイムで解析し、学習プロセスを可視化します。
 
 ## Overview
 
