@@ -10,6 +10,7 @@
 #include <cstring>
 #include <iostream>
 #include <string>
+#include <thread>
 
 int main(int argc, char** argv) {
   CLI::App app{"LARCS Network Ping Tool - UDP connectivity test"};
@@ -19,7 +20,7 @@ int main(int argc, char** argv) {
   int count = 4;
   int timeout_ms = 1000;
 
-  app.add_option("-h,--host", host, "Target host address")
+  app.add_option("--host", host, "Target host address")
       ->default_val("127.0.0.1");
   app.add_option("-p,--port", port, "Target port")->default_val(8888);
   app.add_option("-c,--count", count, "Number of ping attempts")
