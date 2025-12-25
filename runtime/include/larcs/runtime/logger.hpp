@@ -1,10 +1,10 @@
 #pragma once
 
+#include <spdlog/spdlog.h>
+
 #include <memory>
 #include <string>
 #include <string_view>
-
-#include <spdlog/spdlog.h>
 
 namespace larcs::runtime {
 
@@ -15,8 +15,7 @@ enum class LogLevel { TRACE, DEBUG, INFO, WARN, ERROR, CRITICAL };
 class Logger {
  public:
   // Initialize logger with file output
-  static void Initialize(const std::string& log_file_path,
-                         LogLevel level = LogLevel::INFO);
+  static void Initialize(const std::string& log_file_path, LogLevel level = LogLevel::INFO);
 
   // Get logger instance
   static std::shared_ptr<spdlog::logger> Get();

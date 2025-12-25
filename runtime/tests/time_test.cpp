@@ -44,8 +44,7 @@ TEST(TimeTest, TimePointConversion) {
   auto converted = ToTimePoint(t);
 
   // Times should be very close (within microseconds)
-  auto diff = std::chrono::duration_cast<std::chrono::microseconds>(
-      now - converted);
+  auto diff = std::chrono::duration_cast<std::chrono::microseconds>(now - converted);
   EXPECT_LT(std::abs(diff.count()), 1000);
 }
 

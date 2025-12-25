@@ -9,7 +9,8 @@ template <typename MessageType>
 struct Publisher<MessageType>::Impl {
   std::string topic_name;
 
-  explicit Impl(std::string name) : topic_name(std::move(name)) {}
+  explicit Impl(std::string name) : topic_name(std::move(name)) {
+  }
 };
 
 template <typename MessageType>

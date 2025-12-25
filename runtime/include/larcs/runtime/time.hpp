@@ -7,11 +7,13 @@ namespace larcs::runtime {
 
 // Time structure matching protobuf Time message
 struct Time {
-  int64_t sec;      // Seconds since epoch
-  uint32_t nanosec; // Nanoseconds component
+  int64_t sec;       // Seconds since epoch
+  uint32_t nanosec;  // Nanoseconds component
 
-  Time() : sec(0), nanosec(0) {}
-  Time(int64_t s, uint32_t ns) : sec(s), nanosec(ns) {}
+  Time() : sec(0), nanosec(0) {
+  }
+  Time(int64_t s, uint32_t ns) : sec(s), nanosec(ns) {
+  }
 };
 
 // Get current monotonic time
@@ -27,11 +29,9 @@ double ToSeconds(const Time& time);
 Time FromSeconds(double seconds);
 
 // Convert std::chrono::time_point to Time
-Time FromTimePoint(
-    const std::chrono::time_point<std::chrono::system_clock>& tp);
+Time FromTimePoint(const std::chrono::time_point<std::chrono::system_clock>& tp);
 
 // Convert Time to std::chrono::time_point
-std::chrono::time_point<std::chrono::system_clock> ToTimePoint(
-    const Time& time);
+std::chrono::time_point<std::chrono::system_clock> ToTimePoint(const Time& time);
 
 }  // namespace larcs::runtime

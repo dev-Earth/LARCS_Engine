@@ -10,14 +10,12 @@ struct Subscriber<MessageType>::Impl {
   std::string topic_name;
   CallbackType callback;
 
-  Impl(std::string name, CallbackType cb)
-      : topic_name(std::move(name)), callback(std::move(cb)) {
+  Impl(std::string name, CallbackType cb) : topic_name(std::move(name)), callback(std::move(cb)) {
   }
 };
 
 template <typename MessageType>
-Subscriber<MessageType>::Subscriber(const std::string& topic_name,
-                                     CallbackType callback)
+Subscriber<MessageType>::Subscriber(const std::string& topic_name, CallbackType callback)
     : impl_(std::make_unique<Impl>(topic_name, std::move(callback))) {
 }
 

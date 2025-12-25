@@ -1,11 +1,10 @@
-#include <CLI/CLI.hpp>
-#include <fmt/core.h>
-
 #include <arpa/inet.h>
+#include <fmt/core.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <CLI/CLI.hpp>
 #include <chrono>
 #include <cstring>
 #include <iostream>
@@ -20,13 +19,10 @@ int main(int argc, char** argv) {
   int count = 4;
   int timeout_ms = 1000;
 
-  app.add_option("--host", host, "Target host address")
-      ->default_val("127.0.0.1");
+  app.add_option("--host", host, "Target host address")->default_val("127.0.0.1");
   app.add_option("-p,--port", port, "Target port")->default_val(8888);
-  app.add_option("-c,--count", count, "Number of ping attempts")
-      ->default_val(4);
-  app.add_option("-t,--timeout", timeout_ms, "Timeout in milliseconds")
-      ->default_val(1000);
+  app.add_option("-c,--count", count, "Number of ping attempts")->default_val(4);
+  app.add_option("-t,--timeout", timeout_ms, "Timeout in milliseconds")->default_val(1000);
 
   CLI11_PARSE(app, argc, argv);
 
@@ -81,17 +77,14 @@ int main(int argc, char** argv) {
     socklen_t from_len = sizeof(from_addr);
 
     ssize_t received =
-        recvfrom(sockfd, buffer, sizeof(buffer) - 1, 0,
-                 (struct sockaddr*)&from_addr, &from_len);
+        recvfrom(sockfd, buffer, sizeof(buffer) - 1, 0, (struct sockaddr*)&from_addr, &from_len);
 
     auto end = std::chrono::steady_clock::now();
-    auto duration =
-        std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
     if (received > 0) {
       buffer[received] = '\0';
-      fmt::print("Attempt {}: Response received in {} ms\n", i + 1,
-                 duration.count());
+      fmt::print("Attempt {}: Response received in {} ms\n", i + 1, duration.count());
       successful++;
     } else {
       fmt::print("Attempt {}: Timeout (no response)\n", i + 1);
@@ -107,10 +100,8 @@ int main(int argc, char** argv) {
   close(sockfd);
 
   fmt::print("\n--- Summary ---\n");
-  fmt::print("Sent: {}, Received: {}, Failed: {}\n", count, successful,
-             failed);
-  fmt::print("Success rate: {:.1f}%\n",
-             (100.0 * successful) / static_cast<double>(count));
+  fmt::print("Sent: {}, Received: {}, Failed: {}\n", count, successful, failed);
+  fmt::print("Success rate: {:.1f}%\n", (100.0 * successful) / static_cast<double>(count));
 
   return (successful > 0) ? 0 : 1;
 }

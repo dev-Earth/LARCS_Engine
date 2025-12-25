@@ -10,16 +10,15 @@ std::shared_ptr<spdlog::logger> Logger::logger_ = nullptr;
 void Logger::Initialize(const std::string& log_file_path, LogLevel level) {
   // Create sinks
   auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-  auto file_sink =
-      std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file_path, true);
+  auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file_path, true);
 
   // Set format
   console_sink->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] %v");
   file_sink->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%t] %v");
 
   // Create logger with both sinks
-  logger_ = std::make_shared<spdlog::logger>(
-      "larcs", spdlog::sinks_init_list{console_sink, file_sink});
+  logger_ =
+      std::make_shared<spdlog::logger>("larcs", spdlog::sinks_init_list{console_sink, file_sink});
 
   // Set level
   spdlog::level::level_enum spdlog_level;

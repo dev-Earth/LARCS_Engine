@@ -1,6 +1,6 @@
-#include <CLI/CLI.hpp>
 #include <fmt/core.h>
 
+#include <CLI/CLI.hpp>
 #include <iostream>
 #include <string>
 
@@ -12,8 +12,7 @@ int main(int argc, char** argv) {
   bool loop = false;
 
   app.add_option("-i,--input", input_file, "Input file for replay")->required();
-  app.add_option("-r,--rate", rate, "Playback rate multiplier")
-      ->default_val(1.0);
+  app.add_option("-r,--rate", rate, "Playback rate multiplier")->default_val(1.0);
   app.add_flag("-l,--loop", loop, "Loop playback");
 
   CLI11_PARSE(app, argc, argv);
