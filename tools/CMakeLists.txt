@@ -1,0 +1,25 @@
+cmake_minimum_required(VERSION 3.25)
+
+# Ping tool
+larcs_add_executable(larcs-ping
+  SOURCES src/ping.cpp
+  DEPENDENCIES
+    fmt::fmt
+    CLI11::CLI11
+)
+
+# Record tool
+larcs_add_executable(larcs-record
+  SOURCES src/record.cpp
+  DEPENDENCIES
+    fmt::fmt
+    CLI11::CLI11
+)
+
+# Replay tool
+larcs_add_executable(larcs-replay
+  SOURCES src/replay.cpp
+  DEPENDENCIES
+    fmt::fmt
+    CLI11::CLI11
+)

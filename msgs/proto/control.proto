@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package larcs.msgs;
+
+import "common.proto";
+import "geometry.proto";
+
+// Single point in a trajectory
+message TrajectoryPoint {
+  double t = 1;           // Time from trajectory start (seconds)
+  Pose pose = 2;          // Target pose at this time
+  Twist velocity = 3;     // Target velocity at this time
+}
+
+// Complete trajectory plan
+message TrajectoryPlan {
+  Header header = 1;                      // Message header
+  string plan_id = 2;                     // Unique plan identifier
+  repeated TrajectoryPoint points = 3;    // Trajectory points
+  double v_max = 4;                       // Maximum linear velocity (m/s)
+  double a_max = 5;                       // Maximum linear acceleration (m/s^2)
+  double omega_max = 6;                   // Maximum angular velocity (rad/s)
+}
+
+// Wheel state information
+message WheelState {
+  Header header = 1;                 // Message header
+  repeated double rpm = 2;           // RPM for each wheel
+  repeated int64 encoder_ticks = 3;  // Encoder ticks for each wheel
+}
