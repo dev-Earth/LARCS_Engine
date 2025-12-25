@@ -1,0 +1,14 @@
+{
+  "name": "larcs-engine",
+  "version": "0.1.0",
+  "description": "LARCS - Autonomous Robot Competition System Engine",
+  "homepage": "https://github.com/dev-Earth/LARCS_Engine",
+  "dependencies": [
+    "fmt",
+    "spdlog",
+    "protobuf",
+    "cli11",
+    "gtest"
+  ],
+  "builtin-baseline": "64e1fbee7d9f40eab5d112aaff648c4dcffe9e47"
+}
