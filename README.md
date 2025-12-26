@@ -28,13 +28,14 @@ LARCS Engine provides a lightweight, high-performance foundation for building au
 - ✅ Zenoh-based pub/sub transport
 - ✅ Publisher/Subscriber with QoS profiles
 - ✅ CLI tools (pub, sub, ping, record, replay)
+- ✅ MCAP message recording and replay
+- ✅ ESP32 serial communication bridge
 - ✅ CMake preset integration
 - ✅ Unit testing framework
 - ✅ Auto-discovery across processes and machines
 
 ### Planned (Future Revisions)
 - Service/Client RPC patterns
-- Message recording/replay with MCAP
 - Network statistics and monitoring
 - Hardware abstraction layer
 - Path planning and navigation
@@ -122,11 +123,14 @@ After building, try the tools:
 ./build/default/tools/larcs-ping --help
 ./build/default/tools/larcs-ping -h 127.0.0.1 -p 8888 -c 4
 
-# Recording tool (skeleton)
-./build/default/tools/larcs-record -o data.log -t /odom /cmd_vel
+# Message recording (MCAP format)
+./build/default/tools/larcs-record -o data.mcap -d 10 -v
+./build/default/tools/larcs-record -o data.mcap -t /odom /cmd_vel  # Record specific topics
 
-# Replay tool (skeleton)
-./build/default/tools/larcs-replay -i data.log -r 1.0
+# Message replay
+./build/default/tools/larcs-replay -i data.mcap --info  # Show file info
+./build/default/tools/larcs-replay -i data.mcap -r 1.0  # Replay at 1x speed
+./build/default/tools/larcs-replay -i data.mcap -r 2.0 -l  # Replay at 2x speed with loop
 ```
 
 ## Project Structure
@@ -144,22 +148,32 @@ LARCS_Engine/
 │   │   ├── common.proto    # Time, Header
 │   │   ├── geometry.proto  # Pose, Twist, etc.
 │   │   ├── control.proto   # Trajectory, WheelState
-│   │   └── health.proto    # System health monitoring
+│   │   ├── health.proto    # System health monitoring
+│   │   └── esp32.proto     # ESP32 commands and state
 │   └── CMakeLists.txt
 ├── runtime/                # Core runtime library
 │   ├── include/larcs/runtime/
 │   │   ├── time.hpp        # Time utilities
 │   │   ├── publisher.hpp   # Message publisher
 │   │   ├── subscriber.hpp  # Message subscriber
-│   │   └── logger.hpp      # Logging system
+│   │   ├── logger.hpp      # Logging system
+│   │   ├── recorder.hpp    # MCAP recording
+│   │   ├── replayer.hpp    # MCAP replay
+│   │   ├── serial_port.hpp # Serial communication
+│   │   └── esp32_bridge.hpp # ESP32 bridge
 │   ├── src/                # Implementation
+│   │   ├── logger/         # MCAP recorder/replayer
+│   │   ├── serial/         # Serial port and ESP32 bridge
+│   │   └── transport/      # Zenoh transport layer
 │   ├── tests/              # Unit tests
 │   └── CMakeLists.txt
 ├── tools/                  # Command-line utilities
 │   ├── src/
 │   │   ├── ping.cpp        # Network ping tool
-│   │   ├── record.cpp      # Recording tool (skeleton)
-│   │   └── replay.cpp      # Replay tool (skeleton)
+│   │   ├── pub.cpp         # Message publisher
+│   │   ├── sub.cpp         # Message subscriber
+│   │   ├── record.cpp      # MCAP recording tool
+│   │   └── replay.cpp      # MCAP replay tool
 │   └── CMakeLists.txt
 ├── .clang-format          # Code formatting rules
 ├── .clang-tidy            # Static analysis config
@@ -176,6 +190,8 @@ Managed via vcpkg:
 - **protobuf**: Message serialization
 - **CLI11**: Command-line parsing
 - **gtest**: Testing framework
+- **mcap**: Message recording format
+- **lz4**: Compression library
 - **zenoh-c**: High-performance pub/sub communication
 
 ## Communication Layer
@@ -291,12 +307,13 @@ run-clang-tidy
 - ✅ Message definitions
 - ✅ CLI tools skeleton
 
-### Rev.1 - Communication (Current) ✅
+### Rev.1 - Communication ✅
 - ✅ Zenoh transport implementation
 - ✅ Complete pub/sub system with QoS
 - ✅ CLI pub/sub tools
 - ✅ Multi-node auto-discovery
-- ⏳ Message recording/replay (planned)
+- ✅ MCAP message recording/replay
+- ✅ ESP32 serial communication bridge
 
 ### Rev.2 - Robot Control
 - Trajectory execution
