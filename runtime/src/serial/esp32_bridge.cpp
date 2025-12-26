@@ -39,11 +39,10 @@ bool ESP32Bridge::start() {
   
   // Subscribe to command topic
   auto command_sub = std::make_shared<Subscriber<larcs::msgs::ESP32Command>>(
-      transport_, "/robot/esp32/command");
-  
-  command_sub->subscribe([this](const larcs::msgs::ESP32Command& cmd) {
-    this->on_command(cmd);
-  });
+      transport_, "/robot/esp32/command",
+      [this](const larcs::msgs::ESP32Command& cmd) {
+        this->on_command(cmd);
+      });
   
   running_.store(true);
   spdlog::info("ESP32Bridge started");
@@ -103,7 +102,7 @@ void ESP32Bridge::on_command(const larcs::msgs::ESP32Command& cmd) {
   }
   
   spdlog::debug("Sent ESP32Command: mode={}, wheels={}", 
-               cmd.mode(), cmd.wheel_rpm_target_size());
+               static_cast<int>(cmd.mode()), cmd.wheel_rpm_target_size());
 }
 
 uint16_t ESP32Bridge::calculate_crc16(const std::vector<uint8_t>& data) {

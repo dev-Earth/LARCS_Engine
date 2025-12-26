@@ -22,7 +22,7 @@ find_package(Protobuf CONFIG REQUIRED)
 find_package(CLI11 CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
 find_package(Zenoh REQUIRED)
-find_package(mcap CONFIG REQUIRED)
+find_package(unofficial-mcap CONFIG REQUIRED)
 find_package(lz4 CONFIG REQUIRED)
 
 # Enable testing

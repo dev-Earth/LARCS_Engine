@@ -23,8 +23,7 @@ bool Recorder::open() {
   }
   
   mcap::McapWriterOptions options("larcs");
-  options.compression = mcap::Compression::Lz4;
-  options.compressionLevel = mcap::CompressionLevel::Fast;
+  options.compression = mcap::Compression::None;  // Use no compression since LZ4 is disabled
   
   auto status = writer_->open(filepath_, options);
   if (!status.ok()) {
@@ -125,9 +124,5 @@ bool Recorder::record(const std::string& topic, const MessageT& msg, uint64_t ti
   
   return true;
 }
-
-// Explicit template instantiation for common message types
-template bool Recorder::add_topic<google::protobuf::Message>(const std::string&);
-template bool Recorder::record<google::protobuf::Message>(const std::string&, const google::protobuf::Message&, uint64_t);
 
 } // namespace larcs::runtime

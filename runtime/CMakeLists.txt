@@ -7,6 +7,7 @@ set(RUNTIME_SOURCES
   src/transport/publisher.cpp
   src/transport/subscriber.cpp
   src/logger.cpp
+  src/logger/mcap_impl.cpp
   src/logger/recorder.cpp
   src/logger/replayer.cpp
   src/serial/serial_port.cpp
@@ -40,7 +41,7 @@ larcs_add_library(larcs-runtime
     zenohc::lib
     protobuf::libprotobuf
     larcs-msgs
-    mcap
+    unofficial::mcap::mcap
     lz4::lz4
 )
 

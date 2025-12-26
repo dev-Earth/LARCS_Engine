@@ -112,11 +112,15 @@ bool Replayer::replay(std::shared_ptr<ZenohTransport> transport, const ReplayOpt
       // Publish message
       // Note: This is a simplified version that publishes raw bytes
       // In a real implementation, we would need to deserialize and republish properly
-      auto& channel = reader_->channels().at(msg_view.message.channelId);
-      
-      // For now, we just log that we would publish
-      spdlog::debug("Replaying message on topic: {} at timestamp: {}", 
-                   channel->topic, msg_view.message.logTime);
+      const auto& channels = reader_->channels();
+      auto channel_it = channels.find(msg_view.message.channelId);
+      if (channel_it != channels.end()) {
+        const auto& channel = channel_it->second;
+        
+        // For now, we just log that we would publish
+        spdlog::debug("Replaying message on topic: {} at timestamp: {}", 
+                     channel->topic, msg_view.message.logTime);
+      }
       
       message_count++;
     }
@@ -140,15 +144,17 @@ Replayer::FileInfo Replayer::get_info() const {
     return info;
   }
   
-  auto summary = reader_->summary();
-  if (summary) {
-    info.start_time_ns = summary->statistics->messageStartTime;
-    info.end_time_ns = summary->statistics->messageEndTime;
-    info.message_count = summary->statistics->messageCount;
-    
-    for (const auto& [channel_id, channel_ptr] : reader_->channels()) {
-      info.topics.push_back(channel_ptr->topic);
-    }
+  // Get statistics from the reader
+  auto statistics = reader_->statistics();
+  if (statistics) {
+    info.start_time_ns = statistics->messageStartTime;
+    info.end_time_ns = statistics->messageEndTime;
+    info.message_count = statistics->messageCount;
+  }
+  
+  // Get topics from channels
+  for (const auto& [channel_id, channel_ptr] : reader_->channels()) {
+    info.topics.push_back(channel_ptr->topic);
   }
   
   return info;
