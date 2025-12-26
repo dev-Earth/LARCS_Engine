@@ -34,7 +34,20 @@ LARCS Engine provides a lightweight, high-performance foundation for building au
 - ✅ Unit testing framework
 - ✅ Auto-discovery across processes and machines
 
+### Phase 2.1: Simulation Engine (Current)
+- ✅ PhysX 5.x integration (stub for now)
+- ✅ Modular sensor framework (Encoder, IMU)
+- ✅ Robot assembly from YAML configuration
+- ✅ Fixed time step simulation (240Hz)
+- ✅ Time scaling (real-time or faster)
+- ✅ Headless simulation mode
+- ✅ `larcs-matrix` simulation executable
+- ✅ USD loader (placeholder for Phase 2.2)
+
 ### Planned (Future Revisions)
+- Phase 2.2: Full USD integration with physics properties
+- Phase 2.2: LiDAR and depth camera sensors
+- Phase 2.3: Fusion360 plugin for automated export
 - Service/Client RPC patterns
 - Network statistics and monitoring
 - Hardware abstraction layer
@@ -131,6 +144,24 @@ After building, try the tools:
 ./build/default/tools/larcs-replay -i data.mcap --info  # Show file info
 ./build/default/tools/larcs-replay -i data.mcap -r 1.0  # Replay at 1x speed
 ./build/default/tools/larcs-replay -i data.mcap -r 2.0 -l  # Replay at 2x speed with loop
+
+# Physics simulation (larcs-matrix)
+./build/default/apps/larcs-matrix --help
+./build/default/apps/larcs-matrix --config configs/sim_default.yaml
+./build/default/apps/larcs-matrix --config configs/sim_default.yaml --speed 10.0  # 10x faster
+```
+
+### Simulation Quick Start
+
+```bash
+# Terminal 1: Start simulation
+./build/default/apps/larcs-matrix --config configs/sim_default.yaml
+
+# Terminal 2: Control the robot
+./build/default/tools/larcs-pub /robot/cmd_vel '{"linear":{"x":0.5},"angular":{"z":0.2}}' -t Twist
+
+# Terminal 3: Monitor sensors
+./build/default/tools/larcs-sub /robot/imu -t Imu
 ```
 
 ## Project Structure
@@ -142,7 +173,11 @@ LARCS_Engine/
 ├── docs/                   # Documentation
 │   ├── architecture.md     # System design overview
 │   ├── messaging.md        # Message specifications
-│   └── setup.md           # Detailed setup guide
+│   ├── setup.md           # Detailed setup guide
+│   ├── simulation.md      # LARCS Matrix simulation engine
+│   ├── sensor_framework.md # Sensor system documentation
+│   ├── usd_integration.md # USD pipeline guide
+│   └── fusion360_workflow.md # CAD to simulation workflow
 ├── msgs/                   # Protocol buffer definitions
 │   ├── proto/
 │   │   ├── common.proto    # Time, Header
@@ -167,6 +202,30 @@ LARCS_Engine/
 │   │   └── transport/      # Zenoh transport layer
 │   ├── tests/              # Unit tests
 │   └── CMakeLists.txt
+├── sim/                    # Physics simulation library
+│   ├── include/larcs/sim/
+│   │   ├── world.hpp       # PhysX world wrapper
+│   │   ├── sensor/         # Sensor framework
+│   │   │   ├── sensor_base.hpp
+│   │   │   ├── encoder_sensor.hpp
+│   │   │   ├── imu_sensor.hpp
+│   │   │   └── sensor_factory.hpp
+│   │   ├── robot/
+│   │   │   └── robot_assembly.hpp
+│   │   └── usd_loader.hpp  # USD import (Phase 2.2)
+│   ├── src/                # Implementation
+│   ├── tests/              # Unit tests
+│   └── CMakeLists.txt
+├── apps/                   # Applications
+│   └── larcs_matrix/       # Simulation executable
+│       ├── main.cpp
+│       └── CMakeLists.txt
+├── configs/                # Configuration files
+│   └── sim_default.yaml    # Default robot config
+├── scripts/                # Installation scripts
+│   ├── install_zenoh.sh
+│   ├── install_physx.sh    # PhysX 5.x installer
+│   └── install_usd.sh      # USD installer
 ├── tools/                  # Command-line utilities
 │   ├── src/
 │   │   ├── ping.cpp        # Network ping tool
@@ -192,7 +251,13 @@ Managed via vcpkg:
 - **gtest**: Testing framework
 - **mcap**: Message recording format
 - **lz4**: Compression library
+- **eigen3**: Linear algebra library
+- **yaml-cpp**: YAML configuration parsing
 - **zenoh-c**: High-performance pub/sub communication
+
+Manual installation (via scripts):
+- **PhysX 5.x**: Physics simulation engine (`scripts/install_physx.sh`)
+- **USD 23.11**: Universal Scene Description (`scripts/install_usd.sh`)
 
 ## Communication Layer
 
@@ -297,6 +362,10 @@ run-clang-tidy
 - [Message Specifications](docs/messaging.md) - Protocol buffer message details
 - [Transport Layer](docs/transport.md) - Zenoh communication system
 - [Setup Guide](docs/setup.md) - Detailed installation and configuration
+- [Simulation Engine](docs/simulation.md) - LARCS Matrix physics simulation
+- [Sensor Framework](docs/sensor_framework.md) - Modular sensor system
+- [USD Integration](docs/usd_integration.md) - USD pipeline and workflow
+- [Fusion360 Workflow](docs/fusion360_workflow.md) - CAD to simulation guide
 
 ## Roadmap
 
@@ -315,6 +384,31 @@ run-clang-tidy
 - ✅ MCAP message recording/replay
 - ✅ ESP32 serial communication bridge
 
+### Phase 2.1 - Simulation Foundation ✅
+- ✅ PhysX 5.x integration (stub implementation)
+- ✅ Modular sensor framework (Encoder, IMU)
+- ✅ Robot assembly from YAML
+- ✅ Fixed time step simulation (240Hz)
+- ✅ Time scaling and headless mode
+- ✅ `larcs-matrix` executable
+- ✅ USD loader (placeholder)
+- ✅ Complete documentation
+
+### Phase 2.2 - Full Physics Integration (Q1 2024)
+- Full PhysX implementation
+- Complete USD integration with physics properties
+- LiDAR sensor with raycast
+- Depth camera sensor
+- Field/environment configuration
+- GPU acceleration
+
+### Phase 2.3 - CAD Automation (Q2 2024)
+- Fusion360 plugin for one-click export
+- Automatic physics property extraction
+- Sensor metadata embedding
+- Joint and constraint definitions
+- Visual debugging tools
+
 ### Rev.2 - Robot Control
 - Trajectory execution
 - Wheel controller interface
@@ -324,7 +418,7 @@ run-clang-tidy
 ### Rev.3 - Autonomy
 - Path planning
 - Localization
-- Sensor integration
+- Sensor fusion
 - Competition logic
 
 ### Rev.4 - Advanced Features

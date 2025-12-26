@@ -1,0 +1,52 @@
+robot:
+  name: "differential_robot"
+  
+  base:
+    mass: 5.0  # kg
+    size: [0.3, 0.25, 0.15]  # [length, width, height] m
+  
+  wheels:
+    - name: "left_wheel"
+      side: "left"
+      radius: 0.05  # m
+      width: 0.03
+      position: [0, 0.15, 0]  # [x, y, z] relative to base center
+      encoder:
+        model: "incremental"
+        resolution: 2048  # PPR
+        wheel_radius: 0.05
+        topic: "/robot/wheel/left"
+    
+    - name: "right_wheel"
+      side: "right"
+      radius: 0.05
+      width: 0.03
+      position: [0, -0.15, 0]
+      encoder:
+        model: "incremental"
+        resolution: 2048
+        wheel_radius: 0.05
+        topic: "/robot/wheel/right"
+  
+  sensors:
+    - name: "imu_base"
+      type: "imu"
+      position: [0, 0, 0.05]  # relative to base center
+      orientation: [0, 0, 0, 1]  # quaternion [x, y, z, w]
+      spec:
+        model: "BMI088"
+        accel_noise_stddev: 0.01  # m/s^2
+        gyro_noise_stddev: 0.001  # rad/s
+        update_rate: 200  # Hz
+        topic: "/robot/imu"
+
+field:
+  ground:
+    size: [10.0, 10.0]  # m
+    friction: 0.6
+    restitution: 0.1
+
+simulation:
+  physics:
+    timestep: 0.004167  # 1/240 s
+    gravity: -9.81  # m/s^2
