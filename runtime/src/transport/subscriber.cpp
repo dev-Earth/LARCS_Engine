@@ -21,15 +21,15 @@ Subscriber<MessageT>::Subscriber(std::shared_ptr<ZenohTransport> transport,
   if (!transport_ || !transport_->is_running()) {
     spdlog::error("Subscriber: transport not initialized for topic: {}",
                   topic_);
-    subscriber_ = z_subscriber_null();
+    z_internal_subscriber_null(&subscriber_);
     return;
   }
 
   // Create key expression for the topic
-  z_owned_keyexpr_t keyexpr = z_keyexpr_new(topic_.c_str());
-  if (!z_internal_keyexpr_check(&keyexpr)) {
+  z_owned_keyexpr_t keyexpr;
+  if (z_keyexpr_from_str(&keyexpr, topic_.c_str()) != Z_OK) {
     spdlog::error("Subscriber: failed to create keyexpr for topic: {}", topic_);
-    subscriber_ = z_subscriber_null();
+    z_internal_subscriber_null(&subscriber_);
     return;
   }
 
@@ -42,10 +42,11 @@ Subscriber<MessageT>::Subscriber(std::shared_ptr<ZenohTransport> transport,
   auto drop_callback = [](void* ctx) {
     delete static_cast<SubscriberContext<MessageT>*>(ctx);
   };
-  z_owned_closure_sample_t closure = z_closure(zenoh_callback, drop_callback, context);
+  z_owned_closure_sample_t closure;
+  z_closure(&closure, zenoh_callback, drop_callback, context);
 
   // Declare subscriber
-  z_result_t result = z_declare_subscriber(&subscriber_, z_loan(transport_->session()),
+  z_result_t result = z_declare_subscriber(z_loan(transport_->session()), &subscriber_,
                                            z_loan(keyexpr), z_move(closure), nullptr);
 
   z_drop(z_move(keyexpr));
@@ -53,7 +54,7 @@ Subscriber<MessageT>::Subscriber(std::shared_ptr<ZenohTransport> transport,
   if (result != Z_OK) {
     spdlog::error("Subscriber: failed to declare subscriber for topic: {}",
                   topic_);
-    subscriber_ = z_subscriber_null();
+    z_internal_subscriber_null(&subscriber_);
     delete context;
   } else {
     spdlog::debug("Subscriber created for topic: {}", topic_);
@@ -69,12 +70,19 @@ Subscriber<MessageT>::~Subscriber() {
 }
 
 template <typename MessageT>
-void Subscriber<MessageT>::zenoh_callback(const z_sample_t* sample,
+void Subscriber<MessageT>::zenoh_callback(z_loaned_sample_t* sample,
                                           void* context) {
   auto* sub_context = static_cast<SubscriberContext<MessageT>*>(context);
 
   // Extract payload
-  z_owned_slice_t payload = z_sample_payload(sample);
+  const z_loaned_bytes_t* payload_bytes = z_sample_payload(sample);
+  z_owned_slice_t payload;
+  if (z_bytes_to_slice(payload_bytes, &payload) != Z_OK) {
+    spdlog::error("Subscriber: failed to extract payload for topic: {}",
+                  sub_context->topic);
+    return;
+  }
+  
   const uint8_t* data = z_slice_data(z_loan(payload));
   size_t size = z_slice_len(z_loan(payload));
 

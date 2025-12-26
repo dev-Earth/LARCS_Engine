@@ -8,32 +8,40 @@ set(PROTO_FILES
   proto/health.proto
 )
 
-# Create protobuf library
-add_library(larcs-msgs INTERFACE)
-
 # Set up the output directory for generated files
 set(PROTO_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 file(MAKE_DIRECTORY "${PROTO_BINARY_DIR}/larcs/msgs")
 
+# Create list to hold generated sources
+set(PROTO_SRCS)
+set(PROTO_HDRS)
+
 # Generate protobuf files
-protobuf_generate(
-  TARGET larcs-msgs
-  LANGUAGE cpp
-  PROTOS ${PROTO_FILES}
-  IMPORT_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/proto
-  PROTOC_OUT_DIR ${PROTO_BINARY_DIR}/larcs/msgs
+foreach(PROTO_FILE ${PROTO_FILES})
+  get_filename_component(PROTO_NAME ${PROTO_FILE} NAME_WE)
+  list(APPEND PROTO_SRCS "${PROTO_BINARY_DIR}/larcs/msgs/${PROTO_NAME}.pb.cc")
+  list(APPEND PROTO_HDRS "${PROTO_BINARY_DIR}/larcs/msgs/${PROTO_NAME}.pb.h")
+endforeach()
+
+# Generate the protobuf sources
+protobuf_generate_cpp(PROTO_GENERATED_SRCS PROTO_GENERATED_HDRS
+  ${PROTO_FILES}
 )
 
+# Create protobuf library with actual sources
+add_library(larcs-msgs ${PROTO_GENERATED_SRCS} ${PROTO_GENERATED_HDRS})
+
 # Add generated directory to include paths
-target_include_directories(larcs-msgs INTERFACE
-  ${PROTO_BINARY_DIR}
+target_include_directories(larcs-msgs PUBLIC
+  ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 # Link protobuf library
-target_link_libraries(larcs-msgs INTERFACE protobuf::libprotobuf)
+target_link_libraries(larcs-msgs PUBLIC protobuf::libprotobuf)
 
-# Set properties to ensure generated files are created
+# Set properties
 set_target_properties(larcs-msgs PROPERTIES
   LINKER_LANGUAGE CXX
+  PUBLIC_HEADER "${PROTO_GENERATED_HDRS}"
 )

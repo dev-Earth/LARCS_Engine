@@ -12,20 +12,21 @@ Publisher<MessageT>::Publisher(std::shared_ptr<ZenohTransport> transport,
     : transport_(transport), topic_(topic), qos_(qos) {
   if (!transport_ || !transport_->is_running()) {
     spdlog::error("Publisher: transport not initialized for topic: {}", topic_);
-    publisher_ = z_publisher_null();
+    z_internal_publisher_null(&publisher_);
     return;
   }
 
   // Create key expression for the topic
-  z_owned_keyexpr_t keyexpr = z_keyexpr_new(topic_.c_str());
-  if (!z_internal_keyexpr_check(&keyexpr)) {
+  z_owned_keyexpr_t keyexpr;
+  if (z_keyexpr_from_str(&keyexpr, topic_.c_str()) != Z_OK) {
     spdlog::error("Publisher: failed to create keyexpr for topic: {}", topic_);
-    publisher_ = z_publisher_null();
+    z_internal_publisher_null(&publisher_);
     return;
   }
 
   // Configure publisher options based on QoS
-  z_publisher_options_t options = z_publisher_options_default();
+  z_publisher_options_t options;
+  z_publisher_options_default(&options);
 
   switch (qos_) {
     case QoSProfile::Control:
@@ -46,7 +47,7 @@ Publisher<MessageT>::Publisher(std::shared_ptr<ZenohTransport> transport,
   }
 
   // Create publisher
-  z_result_t result = z_declare_publisher(&publisher_, z_loan(transport_->session()),
+  z_result_t result = z_declare_publisher(z_loan(transport_->session()), &publisher_,
                                           z_loan(keyexpr), &options);
 
   z_drop(z_move(keyexpr));
@@ -54,7 +55,7 @@ Publisher<MessageT>::Publisher(std::shared_ptr<ZenohTransport> transport,
   if (result != Z_OK) {
     spdlog::error("Publisher: failed to declare publisher for topic: {}",
                   topic_);
-    publisher_ = z_publisher_null();
+    z_internal_publisher_null(&publisher_);
   } else {
     spdlog::debug("Publisher created for topic: {}", topic_);
   }
@@ -83,11 +84,20 @@ bool Publisher<MessageT>::publish(const MessageT& msg) {
     return false;
   }
 
+  // Create bytes from serialized data
+  z_owned_bytes_t payload;
+  if (z_bytes_copy_from_buf(&payload, 
+                            (const uint8_t*)serialized.data(),
+                            serialized.size()) != Z_OK) {
+    spdlog::error("Publisher: failed to create payload for topic: {}", topic_);
+    return false;
+  }
+
   // Publish data
-  z_publisher_put_options_t put_options = z_publisher_put_options_default();
+  z_publisher_put_options_t put_options;
+  z_publisher_put_options_default(&put_options);
   int result = z_publisher_put(z_loan(publisher_),
-                                (const uint8_t*)serialized.data(),
-                                serialized.size(), &put_options);
+                                z_move(payload), &put_options);
 
   if (result < 0) {
     spdlog::error("Publisher: failed to publish to topic: {}", topic_);
