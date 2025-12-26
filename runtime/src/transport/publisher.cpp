@@ -17,9 +17,17 @@ Publisher<MessageT>::Publisher(std::shared_ptr<ZenohTransport> transport,
   }
 
   // Create key expression for the topic
+  // Remove leading slash if present (Zenoh 1.7.1 doesn't allow leading slashes)
+  std::string topic_key = topic_;
+  if (!topic_key.empty() && topic_key[0] == '/') {
+    topic_key = topic_key.substr(1);
+  }
+  
   z_owned_keyexpr_t keyexpr;
-  if (z_keyexpr_from_str(&keyexpr, topic_.c_str()) != Z_OK) {
-    spdlog::error("Publisher: failed to create keyexpr for topic: {}", topic_);
+  z_result_t keyexpr_result = z_keyexpr_from_str_autocanonize(&keyexpr, topic_key.c_str());
+  if (keyexpr_result != Z_OK) {
+    spdlog::error("Publisher: failed to create keyexpr for topic: {} (error code: {})", 
+                  topic_, static_cast<int>(keyexpr_result));
     z_internal_publisher_null(&publisher_);
     return;
   }
@@ -112,7 +120,7 @@ bool Publisher<MessageT>::publish(const MessageT& msg) {
 
 // Explicit template instantiation for common types
 // This is needed because the implementation is in a .cpp file
-#include "larcs/msgs/geometry.pb.h"
+#include "geometry.pb.h"
 template class larcs::runtime::Publisher<larcs::msgs::Twist>;
 template class larcs::runtime::Publisher<larcs::msgs::Pose>;
 template class larcs::runtime::Publisher<larcs::msgs::Vector3>;

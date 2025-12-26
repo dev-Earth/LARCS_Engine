@@ -1,6 +1,6 @@
 #include "larcs/runtime/publisher.hpp"
 #include "larcs/runtime/zenoh_transport.hpp"
-#include "larcs/msgs/geometry.pb.h"
+#include "geometry.pb.h"
 
 #include <CLI/CLI.hpp>
 #include <fmt/core.h>

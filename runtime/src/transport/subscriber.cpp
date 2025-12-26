@@ -26,8 +26,14 @@ Subscriber<MessageT>::Subscriber(std::shared_ptr<ZenohTransport> transport,
   }
 
   // Create key expression for the topic
+  // Remove leading slash if present (Zenoh 1.7.1 doesn't allow leading slashes)
+  std::string topic_key = topic_;
+  if (!topic_key.empty() && topic_key[0] == '/') {
+    topic_key = topic_key.substr(1);
+  }
+  
   z_owned_keyexpr_t keyexpr;
-  if (z_keyexpr_from_str(&keyexpr, topic_.c_str()) != Z_OK) {
+  if (z_keyexpr_from_str_autocanonize(&keyexpr, topic_key.c_str()) != Z_OK) {
     spdlog::error("Subscriber: failed to create keyexpr for topic: {}", topic_);
     z_internal_subscriber_null(&subscriber_);
     return;
@@ -109,7 +115,7 @@ void Subscriber<MessageT>::zenoh_callback(z_loaned_sample_t* sample,
 }  // namespace larcs::runtime
 
 // Explicit template instantiation for common types
-#include "larcs/msgs/geometry.pb.h"
+#include "geometry.pb.h"
 template class larcs::runtime::Subscriber<larcs::msgs::Twist>;
 template class larcs::runtime::Subscriber<larcs::msgs::Pose>;
 template class larcs::runtime::Subscriber<larcs::msgs::Vector3>;
