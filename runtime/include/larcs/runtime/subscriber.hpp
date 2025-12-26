@@ -33,7 +33,7 @@ class Subscriber {
   const std::string& topic() const { return topic_; }
 
  private:
-  static void zenoh_callback(const z_sample_t* sample, void* context);
+  static void zenoh_callback(z_loaned_sample_t* sample, void* context);
 
   std::shared_ptr<ZenohTransport> transport_;
   std::string topic_;

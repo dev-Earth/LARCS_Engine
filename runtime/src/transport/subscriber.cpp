@@ -21,15 +21,21 @@ Subscriber<MessageT>::Subscriber(std::shared_ptr<ZenohTransport> transport,
   if (!transport_ || !transport_->is_running()) {
     spdlog::error("Subscriber: transport not initialized for topic: {}",
                   topic_);
-    subscriber_ = z_subscriber_null();
+    z_internal_subscriber_null(&subscriber_);
     return;
   }
 
   // Create key expression for the topic
-  z_owned_keyexpr_t keyexpr = z_keyexpr_new(topic_.c_str());
-  if (!z_check(keyexpr)) {
+  // Remove leading slash if present (Zenoh 1.7.1 doesn't allow leading slashes)
+  std::string topic_key = topic_;
+  if (!topic_key.empty() && topic_key[0] == '/') {
+    topic_key = topic_key.substr(1);
+  }
+  
+  z_owned_keyexpr_t keyexpr;
+  if (z_keyexpr_from_str_autocanonize(&keyexpr, topic_key.c_str()) != Z_OK) {
     spdlog::error("Subscriber: failed to create keyexpr for topic: {}", topic_);
-    subscriber_ = z_subscriber_null();
+    z_internal_subscriber_null(&subscriber_);
     return;
   }
 
@@ -42,17 +48,20 @@ Subscriber<MessageT>::Subscriber(std::shared_ptr<ZenohTransport> transport,
   auto drop_callback = [](void* ctx) {
     delete static_cast<SubscriberContext<MessageT>*>(ctx);
   };
-  z_owned_closure_sample_t closure = z_closure(zenoh_callback, drop_callback, context);
+  z_owned_closure_sample_t closure;
+  z_closure(&closure, zenoh_callback, drop_callback, context);
 
   // Declare subscriber
-  subscriber_ = z_declare_subscriber(z_loan(transport_->session()),
-                                     z_loan(keyexpr), z_move(closure), nullptr);
+  // Note: nullptr for options uses default subscriber options
+  z_result_t result = z_declare_subscriber(z_loan(transport_->session()), &subscriber_,
+                                           z_loan(keyexpr), z_move(closure), nullptr);
 
   z_drop(z_move(keyexpr));
 
-  if (!z_check(subscriber_)) {
+  if (result != Z_OK) {
     spdlog::error("Subscriber: failed to declare subscriber for topic: {}",
                   topic_);
+    z_internal_subscriber_null(&subscriber_);
     delete context;
   } else {
     spdlog::debug("Subscriber created for topic: {}", topic_);
@@ -61,19 +70,26 @@ Subscriber<MessageT>::Subscriber(std::shared_ptr<ZenohTransport> transport,
 
 template <typename MessageT>
 Subscriber<MessageT>::~Subscriber() {
-  if (z_check(subscriber_)) {
+  if (z_internal_subscriber_check(&subscriber_)) {
     z_undeclare_subscriber(z_move(subscriber_));
     spdlog::debug("Subscriber destroyed for topic: {}", topic_);
   }
 }
 
 template <typename MessageT>
-void Subscriber<MessageT>::zenoh_callback(const z_sample_t* sample,
+void Subscriber<MessageT>::zenoh_callback(z_loaned_sample_t* sample,
                                           void* context) {
   auto* sub_context = static_cast<SubscriberContext<MessageT>*>(context);
 
   // Extract payload
-  z_owned_slice_t payload = z_sample_payload(sample);
+  const z_loaned_bytes_t* payload_bytes = z_sample_payload(sample);
+  z_owned_slice_t payload;
+  if (z_bytes_to_slice(payload_bytes, &payload) != Z_OK) {
+    spdlog::error("Subscriber: failed to extract payload for topic: {}",
+                  sub_context->topic);
+    return;
+  }
+  
   const uint8_t* data = z_slice_data(z_loan(payload));
   size_t size = z_slice_len(z_loan(payload));
 
@@ -100,7 +116,7 @@ void Subscriber<MessageT>::zenoh_callback(const z_sample_t* sample,
 }  // namespace larcs::runtime
 
 // Explicit template instantiation for common types
-#include "larcs/msgs/geometry.pb.h"
+#include "geometry.pb.h"
 template class larcs::runtime::Subscriber<larcs::msgs::Twist>;
 template class larcs::runtime::Subscriber<larcs::msgs::Pose>;
 template class larcs::runtime::Subscriber<larcs::msgs::Vector3>;

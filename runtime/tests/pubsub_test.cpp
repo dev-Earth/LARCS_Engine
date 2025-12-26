@@ -1,7 +1,7 @@
 #include "larcs/runtime/publisher.hpp"
 #include "larcs/runtime/subscriber.hpp"
 #include "larcs/runtime/zenoh_transport.hpp"
-#include "larcs/msgs/geometry.pb.h"
+#include "geometry.pb.h"
 
 #include <gtest/gtest.h>
 

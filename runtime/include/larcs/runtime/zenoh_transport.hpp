@@ -17,10 +17,10 @@ class ZenohTransport : public Transport {
   void shutdown() override;
   bool is_running() const override;
 
-  z_session_t& session() { return session_; }
+  z_owned_session_t& session() { return session_; }
 
  private:
-  z_session_t session_;
+  z_owned_session_t session_;
   bool running_ = false;
 };
 

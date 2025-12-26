@@ -8,7 +8,7 @@ namespace larcs::runtime {
 
 ZenohTransport::ZenohTransport() : running_(false) {
   // Initialize session to null/invalid state
-  session_ = z_session_null();
+  z_internal_session_null(&session_);
 }
 
 ZenohTransport::~ZenohTransport() {
@@ -24,8 +24,8 @@ bool ZenohTransport::initialize(const std::string& config_path) {
   }
 
   // Create Zenoh configuration
-  z_owned_config_t config = z_config_default();
-  if (!z_check(config)) {
+  z_owned_config_t config;
+  if (z_config_default(&config) != Z_OK) {
     spdlog::error("Failed to create Zenoh default config");
     return false;
   }
@@ -39,13 +39,12 @@ bool ZenohTransport::initialize(const std::string& config_path) {
   }
 
   // Set peer mode with multicast scouting for automatic discovery
-  zp_config_insert(z_loan(config), Z_CONFIG_MODE_KEY, z_string_make("peer"));
-  zp_config_insert(z_loan(config), Z_CONFIG_MULTICAST_SCOUTING_KEY,
-                   z_string_make("true"));
+  zc_config_insert_json5(z_loan_mut(config), Z_CONFIG_MODE_KEY, "\"peer\"");
+  zc_config_insert_json5(z_loan_mut(config), Z_CONFIG_MULTICAST_SCOUTING_KEY,
+                         "\"true\"");
 
   // Open Zenoh session
-  session_ = z_open(z_move(config));
-  if (!z_check(session_)) {
+  if (z_open(&session_, z_move(config), NULL) != Z_OK) {
     spdlog::error("Failed to open Zenoh session");
     return false;
   }
@@ -63,8 +62,8 @@ void ZenohTransport::shutdown() {
   spdlog::info("Shutting down Zenoh transport");
 
   // Close the session
-  z_close(z_move(session_));
-  session_ = z_session_null();
+  z_close(z_loan_mut(session_), NULL);
+  z_internal_session_null(&session_);
 
   running_ = false;
   spdlog::info("Zenoh transport shutdown complete");
