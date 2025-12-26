@@ -1,20 +1,21 @@
-# LARCS Messaging System
+# LARCS メッセージングシステム
 
-## Overview
+## 概要
 
-LARCS uses Protocol Buffers (protobuf) for message definitions. This provides:
-- Language-neutral serialization
-- Version compatibility
-- Compact binary format
-- Strong typing
-- Auto-generated code
+LARCS はメッセージ定義に Protocol Buffers（protobuf）を使用します。これにより以下が得られます。
 
-## Message Categories
+- 言語非依存のシリアライズ
+- バージョン互換性
+- コンパクトなバイナリ形式
+- 強い型付け
+- 自動生成コード
 
-### 1. Common Messages (`common.proto`)
+## メッセージ分類
+
+### 1. 共通メッセージ（`common.proto`）
 
 #### Time
-Represents a point in time with nanosecond precision.
+ナノ秒精度で時刻（ある時点）を表します。
 ```protobuf
 message Time {
   int64 sec = 1;        // Seconds since epoch
@@ -22,10 +23,10 @@ message Time {
 }
 ```
 
-**Usage**: Timestamps, duration measurements, time synchronization
+**用途**: タイムスタンプ、経過時間（duration）計測、時刻同期
 
 #### Header
-Standard header included in most messages.
+多くのメッセージに含める標準ヘッダです。
 ```protobuf
 message Header {
   Time timestamp = 1;    // When message was created
@@ -34,12 +35,12 @@ message Header {
 }
 ```
 
-**Usage**: All time-stamped messages (sensor data, commands, telemetry)
+**用途**: 時刻付きメッセージ全般（センサデータ、コマンド、テレメトリ）
 
-### 2. Geometry Messages (`geometry.proto`)
+### 2. 幾何メッセージ（`geometry.proto`）
 
 #### Vector3
-3D vector for positions, velocities, forces.
+位置・速度・力などに使う 3 次元ベクトルです。
 ```protobuf
 message Vector3 {
   double x = 1;
@@ -48,10 +49,10 @@ message Vector3 {
 }
 ```
 
-**Units**: Context-dependent (typically meters, m/s, or N)
+**単位**: 文脈依存（一般に m, m/s, N など）
 
 #### Quaternion
-Orientation representation (normalized).
+姿勢を表すクォータニオンです（正規化が前提）。
 ```protobuf
 message Quaternion {
   double x = 1;
@@ -61,10 +62,10 @@ message Quaternion {
 }
 ```
 
-**Constraint**: Should be normalized (x² + y² + z² + w² = 1)
+**制約**: 正規化されていること（x² + y² + z² + w² = 1）
 
 #### Pose
-Complete position and orientation.
+位置 + 姿勢をまとめて表します。
 ```protobuf
 message Pose {
   Vector3 position = 1;
@@ -72,10 +73,10 @@ message Pose {
 }
 ```
 
-**Usage**: Robot pose, target waypoints, object locations
+**用途**: ロボット姿勢、目標ウェイポイント、物体の位置
 
 #### Twist
-Linear and angular velocity.
+並進速度と角速度を表します。
 ```protobuf
 message Twist {
   Vector3 linear = 1;    // Linear velocity [m/s]
@@ -83,12 +84,12 @@ message Twist {
 }
 ```
 
-**Usage**: Velocity commands, odometry
+**用途**: 速度コマンド、オドメトリ
 
-### 3. Control Messages (`control.proto`)
+### 3. 制御メッセージ（`control.proto`）
 
 #### TrajectoryPoint
-Single point in a trajectory.
+軌道上の 1 点です。
 ```protobuf
 message TrajectoryPoint {
   double t = 1;           // Time from start [seconds]
@@ -98,7 +99,7 @@ message TrajectoryPoint {
 ```
 
 #### TrajectoryPlan
-Complete trajectory for robot to execute.
+ロボットが実行する軌道全体です。
 ```protobuf
 message TrajectoryPlan {
   Header header = 1;
@@ -110,10 +111,10 @@ message TrajectoryPlan {
 }
 ```
 
-**Usage**: High-level motion commands from planner to controller
+**用途**: プランナからコントローラへの高レベル運動指令
 
 #### WheelState
-Current state of drive wheels.
+駆動輪の現在状態です。
 ```protobuf
 message WheelState {
   Header header = 1;
@@ -122,12 +123,12 @@ message WheelState {
 }
 ```
 
-**Usage**: Odometry, motor control feedback, diagnostics
+**用途**: オドメトリ、モータ制御フィードバック、診断
 
-### 4. Health Messages (`health.proto`)
+### 4. ヘルス（状態監視）メッセージ（`health.proto`）
 
 #### ComponentStatus
-Status of a single system component.
+システム内の 1 コンポーネントの状態です。
 ```protobuf
 message ComponentStatus {
   enum State {
@@ -146,7 +147,7 @@ message ComponentStatus {
 ```
 
 #### SystemHealth
-Overall system health report.
+システム全体のヘルスレポートです。
 ```protobuf
 message SystemHealth {
   Header header = 1;
@@ -154,33 +155,33 @@ message SystemHealth {
 }
 ```
 
-**Usage**: Monitoring, diagnostics, automated fault detection
+**用途**: 監視、診断、自動故障検知
 
-## Design Principles
+## 設計原則
 
-### 1. Extensibility
-- Messages can add new fields without breaking compatibility
-- Optional fields for backward compatibility
-- Reserved field numbers for deprecated fields
+### 1. 拡張性
+- 既存フィールドを壊さずに新しいフィールドを追加できる
+- 後方互換のためオプショナルなフィールドを活用
+- 廃止フィールド番号は予約（reserved）する
 
-### 2. Consistency
-- All stamped messages include `Header`
-- All timestamps use `Time` type
-- All poses use `Pose` (position + orientation)
+### 2. 一貫性
+- 時刻付きメッセージは `Header` を含める
+- タイムスタンプは `Time` 型を使用する
+- 姿勢と位置は `Pose`（position + orientation）を用いる
 
-### 3. Efficiency
-- Compact binary format
-- Zero-copy deserialization possible
-- Repeated fields for arrays
+### 3. 効率
+- コンパクトなバイナリ形式
+- ゼロコピーのデシリアライズが可能
+- 配列は repeated フィールドで表現
 
-### 4. Interoperability
-- Language-independent definitions
-- Can interface with ROS via bridge
-- Easy to generate for Python, Java, etc.
+### 4. 相互運用性
+- 言語非依存の定義
+- ブリッジにより ROS と相互運用可能
+- Python/Java などへのコード生成が容易
 
-## Message Usage Patterns
+## メッセージ利用パターン
 
-### Publishing Pattern
+### Publish パターン
 ```cpp
 // Create message
 TrajectoryPlan plan;
@@ -192,7 +193,7 @@ plan.set_plan_id("traj_001");
 publisher.Publish(plan);
 ```
 
-### Subscription Pattern
+### Subscribe パターン
 ```cpp
 void OnTrajectory(const TrajectoryPlan& plan) {
   // Process received plan
@@ -204,24 +205,24 @@ void OnTrajectory(const TrajectoryPlan& plan) {
 Subscriber<TrajectoryPlan> sub("trajectory", OnTrajectory);
 ```
 
-## Extension Guidelines
+## 拡張ガイドライン
 
-### Adding New Message Types
-1. Choose appropriate `.proto` file (or create new one)
-2. Define message with clear field names
-3. Document purpose and units in comments
-4. Add to `msgs/CMakeLists.txt` if new file
-5. Update this documentation
+### 新しいメッセージタイプの追加
+1. 適切な `.proto` ファイルを選ぶ（または新規作成）
+2. 分かりやすいフィールド名を付けて message を定義
+3. 目的や単位（units）をコメントで明記
+4. 新しいファイルの場合は `msgs/CMakeLists.txt` に追加
+5. このドキュメントも更新
 
-### Versioning
-- Use semantic versioning for proto packages
-- Add new optional fields instead of modifying existing
-- Use reserved field numbers for removed fields
-- Document breaking changes
+### バージョニング
+- proto のパッケージはセマンティックバージョニングを想定
+- 既存フィールドを変更せず、新フィールド追加で対応
+- 削除したフィールド番号は reserved で確保
+- 破壊的変更は必ず文書化
 
-### Best Practices
-- Keep messages focused and cohesive
-- Use nested messages for complex structures
-- Document units in comments (m, rad, s, etc.)
-- Use enums for fixed sets of values
-- Include Header for time-critical data
+### ベストプラクティス
+- メッセージは目的を絞り、凝集度を高く保つ
+- 複雑な構造はネスト message を活用
+- 単位（m, rad, s など）をコメントに書く
+- 固定セットは enum で表現
+- 時刻が重要なデータは Header を含める

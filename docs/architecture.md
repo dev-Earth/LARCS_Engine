@@ -1,12 +1,12 @@
-# LARCS Architecture
+# LARCS アーキテクチャ
 
-## Overview
+## 概要
 
-LARCS (Autonomous Robot Competition System) is a modular framework designed for developing, testing, and deploying autonomous robot systems for competitive environments. The system provides a ROS-independent architecture that enables seamless transition from simulation to real hardware.
+LARCS（Learning Autonomous Robot Control System）は、競技環境向けの自律ロボットシステムを **開発・テスト・デプロイ** するためのモジュール型フレームワークです。ROSに依存しないアーキテクチャを採用しており、シミュレーションから実機へスムーズに移行できます。
 
-## System Components
+## システム構成
 
-### High-Level Architecture
+### 全体アーキテクチャ
 
 ```
 ┌─────────────┐      ┌─────────────┐      ┌─────────────┐
@@ -19,30 +19,33 @@ LARCS (Autonomous Robot Competition System) is a modular framework designed for 
                      LARCS Runtime
 ```
 
-### Core Modules
+### コアモジュール
 
-#### 1. **larcs-runtime** (Communication & Time)
-The runtime module provides fundamental capabilities:
-- **Time Management**: Monotonic and system time handling
-- **Publisher/Subscriber**: Message-passing infrastructure (skeleton)
-- **Logger**: Structured logging with spdlog integration
-- **Future**: Network transport, serialization, node lifecycle
+#### 1. **larcs-runtime**（通信 & 時刻）
+runtime モジュールは、基盤となる機能を提供します。
 
-#### 2. **larcs-msgs** (Message Definitions)
-Protocol buffer definitions for all communication:
+- **時刻管理**: 単調増加時計（monotonic）とシステム時刻の取り扱い
+- **Publisher/Subscriber**: メッセージパッシング基盤（現状はスケルトン）
+- **Logger**: spdlog 統合による構造化ログ
+- **将来**: ネットワークトランスポート、シリアライズ、ノードライフサイクル
+
+#### 2. **larcs-msgs**（メッセージ定義）
+通信メッセージは Protocol Buffers で定義されます。
+
 - **common**: Time, Header
 - **geometry**: Vector3, Quaternion, Pose, Twist
 - **control**: TrajectoryPlan, WheelState
 - **health**: SystemHealth, ComponentStatus
 
-#### 3. **larcs-tools** (Command-Line Utilities)
-- **larcs-ping**: Network connectivity testing
-- **larcs-record**: Message recording (skeleton)
-- **larcs-replay**: Message playback (skeleton)
+#### 3. **larcs-tools**（コマンドラインユーティリティ）
 
-## Communication Design
+- **larcs-ping**: ネットワーク疎通のテスト
+- **larcs-record**: メッセージ記録（スケルトン）
+- **larcs-replay**: メッセージ再生（スケルトン）
 
-### Message Flow
+## 通信設計
+
+### メッセージフロー
 
 ```
 Control Station         Robot System
@@ -58,91 +61,95 @@ Control Station         Robot System
 └─────────────┘        └─────────────┘
 ```
 
-### Communication Channels
+### 通信チャネル
 
-1. **Control Channel**: High-frequency (50-100Hz) trajectory commands
-2. **Telemetry Channel**: Sensor data, wheel states, odometry
-3. **Health Channel**: System status monitoring (1-10Hz)
-4. **Perception Channel**: Vision, LIDAR data (variable rate)
+1. **Control チャネル**: 高頻度（50〜100Hz）の軌道・制御コマンド
+2. **Telemetry チャネル**: センサデータ、車輪状態、オドメトリ
+3. **Health チャネル**: システム状態監視（1〜10Hz）
+4. **Perception チャネル**: 画像・LiDAR 等（可変レート）
 
-## Control Cycle Design
+## 制御サイクル設計
 
-### Typical Control Loop (100Hz)
+### 典型的な制御ループ（100Hz）
 ```
-1. Receive trajectory plan (TrajectoryPlan)
-2. Interpolate current target pose
-3. Compute wheel velocities
-4. Send commands to motor controllers
-5. Read encoder feedback (WheelState)
-6. Update odometry
-7. Publish telemetry
+1. 軌道プラン（TrajectoryPlan）を受信
+2. 現在時刻に対応する目標姿勢を補間
+3. 車輪速度を計算
+4. モータコントローラへコマンド送信
+5. エンコーダフィードバック（WheelState）を取得
+6. オドメトリを更新
+7. テレメトリを Publish
 ```
 
-### Time Synchronization
-- All messages include `Header` with timestamp
-- System uses monotonic time for control loops
-- Wall clock time for logging and diagnostics
+### 時刻同期
 
-## Simulation to Real Transfer
+- すべてのメッセージに `Header`（タイムスタンプ）を持たせる
+- 制御ループでは単調増加時計（monotonic time）を使用
+- ログ/診断では壁時計（wall clock time）を使用
 
-### Development Workflow
+## シミュレーションから実機への移行
+
+### 開発ワークフロー
 
 ```
 Phase 1: Simulation Development
-  ├─ Develop algorithms in simulation
-  ├─ Test with virtual sensors/actuators
-  └─ Record test scenarios
+  ├─ シミュレーション上でアルゴリズムを開発
+  ├─ 仮想センサ/アクチュエータでテスト
+  └─ テストシナリオを記録
 
 Phase 2: Hardware Integration
-  ├─ Replace simulation components with hardware drivers
-  ├─ Maintain same message interfaces
-  └─ Replay recorded scenarios on real hardware
+  ├─ シミュレーション部品をハードウェアドライバに置き換え
+  ├─ 同じメッセージインタフェースを維持
+  └─ 記録したシナリオを実機で再生
 
 Phase 3: Field Testing
-  ├─ Deploy to competition robot
-  ├─ Monitor via telemetry
-  └─ Record real-world data for analysis
+  ├─ 競技ロボットへデプロイ
+  ├─ テレメトリで監視
+  └─ 実データを記録して解析
 ```
 
-### Key Principles
-1. **Interface Consistency**: Same APIs for sim and real
-2. **Message-Level Compatibility**: Exact protobuf definitions
-3. **Time Abstraction**: Runtime handles timing details
-4. **Modular Components**: Swap implementations without code changes
+### 重要原則
 
-## Module Dependencies
+1. **インタフェースの一貫性**: シミュレーションと実機で同じ API
+2. **メッセージ互換性**: protobuf 定義を厳密に共通化
+3. **時間抽象化**: runtime がタイミング詳細を吸収
+4. **モジュール性**: 実装を差し替えても上位は変更不要
+
+## モジュール依存
 
 ```
 tools/          → runtime, msgs
-runtime/        → (standalone, minimal deps)
-msgs/           → protobuf only
+runtime/        →（スタンドアロン、依存は最小）
+msgs/           → protobuf のみ
 ```
 
-## Future Expansion
+## 将来拡張
 
-### Planned Features (Rev.1+)
-- Network transport layer (UDP/TCP)
-- Distributed node architecture
-- Real-time scheduling support
-- Hardware abstraction layer
-- Simulation integration layer
-- Competition-specific modules:
-  - Path planning
-  - Localization
-  - Object detection
-  - Strategy executor
+### 計画している機能（Rev.1+）
 
-### Extension Points
-- Custom message types via protobuf
-- Pluggable transport mechanisms
-- Custom time sources (e.g., simulation time)
-- Logger backends (database, cloud)
+- ネットワークトランスポート層（UDP/TCP）
+- 分散ノード・アーキテクチャ
+- リアルタイムスケジューリング対応
+- ハードウェア抽象化レイヤ
+- シミュレーション統合レイヤ
+- 競技特化モジュール:
+  - 経路計画
+  - 自己位置推定
+  - 物体検出
+  - 戦略実行
 
-## Design Goals
+### 拡張ポイント
 
-1. **Minimal Dependencies**: Keep core runtime lean
-2. **ROS Independence**: No ROS required, but interoperable
-3. **CLion Integration**: Seamless IDE experience
-4. **Cross-Platform**: Linux primary, others possible
-5. **Performance**: Hard real-time capable where needed
-6. **Maintainability**: Clear structure, good documentation
+- protobuf によるカスタムメッセージ
+- プラガブルなトランスポート
+- カスタム時間ソース（例: シミュレーション時間）
+- ロガーバックエンド（DB、クラウド等）
+
+## 設計目標
+
+1. **最小依存**: コア runtime を軽量に保つ
+2. **ROS 非依存**: ROS 不要（ただしブリッジで相互運用は可能）
+3. **CLion 統合**: IDE での体験を重視
+4. **クロスプラットフォーム**: Linux を主対象（必要に応じて拡張）
+5. **性能**: 必要ならハードリアルタイム運用も視野
+6. **保守性**: 明確な構造とドキュメント

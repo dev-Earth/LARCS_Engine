@@ -1,20 +1,20 @@
-# LARCS Development Environment Setup
+# LARCS 開発環境セットアップ
 
-This guide covers setting up a development environment for LARCS Engine on Ubuntu 24.04 LTS.
+このガイドでは、Ubuntu 24.04 LTS 上で LARCS Engine の開発環境をセットアップする手順を説明します。
 
-## Prerequisites
+## 前提条件
 
-### System Requirements
+### システム要件
 - **OS**: Ubuntu 24.04 LTS
-- **RAM**: 4GB minimum, 8GB recommended
-- **Disk**: 10GB free space
-- **Compiler**: GCC 13+ or Clang 17+
+- **RAM**: 4GB 以上（推奨 8GB）
+- **Disk**: 空き 10GB 以上
+- **Compiler**: GCC 13+ または Clang 17+
 
-## Installation Steps
+## インストール手順
 
-### 1. System Packages
+### 1. システムパッケージ
 
-Update your system and install essential build tools:
+システムを更新し、ビルドに必要なツールをインストールします。
 
 ```bash
 sudo apt update
@@ -33,9 +33,9 @@ sudo apt install -y \
     clang-tidy
 ```
 
-### 2. vcpkg Installation
+### 2. vcpkg のインストール
 
-Install vcpkg for dependency management:
+依存関係管理のために vcpkg をインストールします。
 
 ```bash
 # Clone vcpkg
@@ -55,7 +55,7 @@ echo 'export VCPKG_ROOT=~/vcpkg' >> ~/.bashrc
 echo 'export PATH=$VCPKG_ROOT:$PATH' >> ~/.bashrc
 ```
 
-### 3. Clone LARCS Repository
+### 3. LARCS リポジトリの取得
 
 ```bash
 cd ~/projects  # or your preferred location
@@ -63,9 +63,9 @@ git clone https://github.com/dev-Earth/LARCS_Engine.git
 cd LARCS_Engine
 ```
 
-### 4. Build the Project
+### 4. ビルド
 
-#### Using CMake Presets (Recommended)
+#### CMake Presets を使う（推奨）
 
 ```bash
 # Configure with default preset
@@ -79,7 +79,7 @@ cd build/default
 ctest --output-on-failure
 ```
 
-#### Using Debug Preset
+#### Debug Preset を使う
 
 ```bash
 # Configure debug build
@@ -93,7 +93,7 @@ cd build/debug
 ctest --output-on-failure -V
 ```
 
-### 5. Verify Installation
+### 5. インストール確認
 
 ```bash
 # Test tools
@@ -106,7 +106,7 @@ cd build/default
 ctest
 ```
 
-Expected output:
+期待される出力例:
 ```
 Test project .../LARCS_Engine/build/default
     Start 1: time_test
@@ -115,57 +115,57 @@ Test project .../LARCS_Engine/build/default
 100% tests passed, 0 tests failed out of 1
 ```
 
-## CLion IDE Setup
+## CLion IDE セットアップ
 
-### 1. Install CLion
+### 1. CLion のインストール
 
-Download and install CLion from [JetBrains website](https://www.jetbrains.com/clion/).
+[JetBrains のサイト](https://www.jetbrains.com/clion/) から CLion をダウンロードしてインストールします。
 
-### 2. Open Project
+### 2. プロジェクトを開く
 
-1. Launch CLion
-2. Select "Open" and navigate to the LARCS_Engine directory
-3. CLion should automatically detect `CMakeLists.txt`
+1. CLion を起動
+2. "Open" を選び、`LARCS_Engine` ディレクトリを指定
+3. CLion が `CMakeLists.txt` を自動検出します
 
-### 3. Configure CMake in CLion
+### 3. CLion で CMake を設定
 
-CLion will automatically detect the CMake presets defined in `CMakePresets.json`:
+CLion は `CMakePresets.json` に定義された CMake Preset を自動検出します。
 
-1. Go to **File → Settings → Build, Execution, Deployment → CMake**
-2. You should see profiles for:
-   - `clion` (Release)
-   - `clion-debug` (Debug)
-3. Select your preferred profile (or use both)
+1. **File → Settings → Build, Execution, Deployment → CMake** を開く
+2. 以下のプロファイルが見えるはずです:
+   - `clion`（Release）
+   - `clion-debug`（Debug）
+3. 目的に応じてプロファイルを選択（両方使っても OK）
 
-### 4. Set Environment Variables
+### 4. 環境変数の設定
 
-If CLion doesn't find vcpkg:
+CLion が vcpkg を見つけられない場合:
 
-1. Go to **File → Settings → Build, Execution, Deployment → CMake**
-2. In the CMake profile, expand "Environment"
-3. Add: `VCPKG_ROOT=/home/your_username/vcpkg`
+1. **File → Settings → Build, Execution, Deployment → CMake**
+2. 対象プロファイルの "Environment" を開く
+3. `VCPKG_ROOT=/home/your_username/vcpkg` を追加
 
-### 5. Build in CLion
+### 5. CLion でビルド
 
-- Use **Build → Build Project** or press `Ctrl+F9`
-- Select targets from the dropdown in the toolbar
+- **Build → Build Project** または `Ctrl+F9`
+- ツールバーのドロップダウンからターゲットを選択できます
 
-### 6. Run Tests in CLion
+### 6. CLion でテスト実行
 
-1. Open the "Run" toolbar dropdown
-2. Select any test (e.g., `time_test`)
-3. Click the green run arrow or press `Shift+F10`
+1. "Run" のドロップダウンを開く
+2. 任意のテスト（例: `time_test`）を選択
+3. 実行ボタン、または `Shift+F10`
 
-### 7. Code Formatting
+### 7. コードフォーマット
 
-CLion will use the `.clang-format` file automatically:
+CLion は `.clang-format` を自動で使います。
 
-- Format file: `Ctrl+Alt+L`
-- Format on save: **Settings → Tools → Actions on Save → Reformat code**
+- ファイルを整形: `Ctrl+Alt+L`
+- 保存時に整形: **Settings → Tools → Actions on Save → Reformat code**
 
-## Development Workflow
+## 開発ワークフロー
 
-### Building
+### ビルド
 
 ```bash
 # Full rebuild
@@ -178,7 +178,7 @@ cmake --build build/default -j$(nproc)
 cmake --build build/default --target larcs-ping
 ```
 
-### Testing
+### テスト
 
 ```bash
 # Run all tests
@@ -195,7 +195,7 @@ ctest -V
 ctest -R time
 ```
 
-### Code Quality
+### コード品質
 
 ```bash
 # Format all code
@@ -206,11 +206,11 @@ cd build/default
 run-clang-tidy
 ```
 
-## Troubleshooting
+## トラブルシューティング
 
-### vcpkg Issues
+### vcpkg 関連
 
-**Problem**: CMake can't find vcpkg
+**問題**: CMake が vcpkg を見つけられない
 ```bash
 # Ensure VCPKG_ROOT is set
 echo $VCPKG_ROOT
@@ -220,7 +220,7 @@ echo $VCPKG_ROOT
 export VCPKG_ROOT=~/vcpkg
 ```
 
-**Problem**: vcpkg fails to install packages
+**問題**: vcpkg のパッケージインストールが失敗する
 ```bash
 # Clear vcpkg cache
 rm -rf $VCPKG_ROOT/buildtrees
@@ -231,9 +231,9 @@ cd $VCPKG_ROOT
 ./vcpkg install fmt spdlog protobuf cli11 gtest
 ```
 
-### Build Issues
+### ビルド関連
 
-**Problem**: Protobuf generation fails
+**問題**: Protobuf のコード生成が失敗する
 ```bash
 # Ensure protobuf is installed
 vcpkg list | grep protobuf
@@ -242,31 +242,31 @@ vcpkg list | grep protobuf
 vcpkg install protobuf
 ```
 
-**Problem**: GTest not found
+**問題**: GTest が見つからない
 ```bash
 # Install GTest via vcpkg
 vcpkg install gtest
 ```
 
-### CLion Issues
+### CLion 関連
 
-**Problem**: CLion shows "CMake Error"
-- Check that VCPKG_ROOT is set in CLion settings
-- Try "File → Reload CMake Project"
-- Invalidate caches: "File → Invalidate Caches → Invalidate and Restart"
+**問題**: CLion に "CMake Error" が出る
+- CLion 設定で `VCPKG_ROOT` がセットされているか確認
+- "File → Reload CMake Project" を試す
+- キャッシュを無効化: "File → Invalidate Caches → Invalidate and Restart"
 
-**Problem**: Code completion not working
-- Ensure "Rescan files" has completed (bottom right of CLion)
-- Regenerate CMake: "Tools → CMake → Reset Cache and Reload Project"
+**問題**: コード補完が動かない
+- 右下の "Rescan files" が完了しているか確認
+- "Tools → CMake → Reset Cache and Reload Project" で再生成
 
-## Next Steps
+## 次に読むもの
 
-- Read [architecture.md](architecture.md) for system overview
-- Read [messaging.md](messaging.md) for message definitions
-- Explore example code in `runtime/tests/`
-- Start developing your robot control logic!
+- システム概要: [architecture.md](architecture.md)
+- メッセージ定義: [messaging.md](messaging.md)
+- 例コード: `runtime/tests/` 配下
+- 必要なロボット制御ロジックを書き始めましょう
 
-## Additional Resources
+## 参考資料
 
 - [CMake Documentation](https://cmake.org/documentation/)
 - [vcpkg Documentation](https://vcpkg.io/)

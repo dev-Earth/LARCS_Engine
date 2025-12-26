@@ -1,26 +1,26 @@
 # LARCS Transport Layer
 
-## Overview
+## 概要
 
-LARCS uses **Zenoh** as its communication transport layer. Zenoh provides a high-performance, ROS-independent pub/sub and RPC system with automatic peer discovery, making it ideal for robotics applications that need to work across simulation, real hardware, and monitoring tools.
+LARCS は通信トランスポート層として **Zenoh** を採用しています。Zenoh は高性能で ROS 非依存の Pub/Sub および RPC を提供し、自動ピア検出（auto discovery）も備えています。これにより、シミュレーション・実機・監視ツール（モニタリング）間をまたぐロボットアプリケーションに適した通信基盤になります。
 
-## What is Zenoh?
+## Zenoh とは？
 
-[Zenoh](https://zenoh.io/) is a modern communication middleware designed for:
+[Zenoh](https://zenoh.io/) は、以下を目的として設計されたモダンな通信ミドルウェアです。
 
-- **High Performance**: Zero-copy transfers, low latency
-- **Auto Discovery**: Peers automatically find each other via multicast scouting
-- **Flexible Deployment**: Works across processes, machines, and networks
-- **ROS Independence**: No dependency on ROS infrastructure
-- **Unified API**: Same code works for local and remote communication
+- **高性能**: ゼロコピー転送、低レイテンシ
+- **自動検出（Auto Discovery）**: マルチキャストによるスカウティングでピアを自動発見
+- **柔軟なデプロイ**: プロセス間・マシン間・ネットワーク越しでも動作
+- **ROS 非依存**: ROS のインフラに依存しない
+- **統一 API**: ローカルでもリモートでも同じコードで動作
 
-Unlike traditional middleware, Zenoh is designed from the ground up for real-time robotics with minimal overhead.
+従来のミドルウェアと異なり、Zenoh はリアルタイム・ロボティクス用途を前提に、最小オーバーヘッドで動作するよう設計されています。
 
-## Architecture
+## アーキテクチャ
 
-### Transport Abstraction
+### トランスポート抽象化
 
-LARCS provides a clean abstraction layer over Zenoh:
+LARCS は Zenoh の上に、扱いやすい抽象化レイヤを提供します。
 
 ```cpp
 // Initialize transport
@@ -45,61 +45,63 @@ twist.mutable_linear()->set_x(1.0);
 pub->publish(twist);
 ```
 
-### QoS Profiles
+### QoS プロファイル
 
-LARCS defines three Quality-of-Service profiles optimized for different use cases:
+LARCS は用途別に最適化した 3 つの Quality-of-Service (QoS) プロファイルを定義しています。
 
-#### Control (High Reliability)
-- **Use Case**: Trajectory commands, control signals, emergency stop
-- **Congestion Control**: BLOCK (wait for capacity)
-- **Priority**: REAL_TIME (highest)
-- **Reliability**: Messages are not dropped
+#### Control（高信頼）
+- **用途**: 軌道コマンド、制御信号、緊急停止
+- **混雑制御（Congestion Control）**: BLOCK（容量が空くまで待つ）
+- **優先度**: REAL_TIME（最優先）
+- **信頼性**: メッセージを落とさない
 
 ```cpp
 QoSProfile::Control
 ```
 
-#### Telemetry (Latest Value)
-- **Use Case**: Robot state, odometry, sensor readings
-- **Congestion Control**: DROP (discard old data)
-- **Priority**: DATA (normal)
-- **Reliability**: Latest value is most important
+#### Telemetry（最新値優先）
+- **用途**: ロボット状態、オドメトリ、センサ値
+- **混雑制御（Congestion Control）**: DROP（古いデータを捨てる）
+- **優先度**: DATA（通常）
+- **信頼性**: 最新値が最も重要
 
 ```cpp
 QoSProfile::Telemetry
 ```
 
-#### Perception (High Throughput)
-- **Use Case**: Point clouds, images, large sensor data
-- **Congestion Control**: DROP (discard when congested)
-- **Priority**: DATA_LOW (background)
-- **Reliability**: Best effort
+#### Perception（高スループット）
+- **用途**: 点群、画像など大容量センサデータ
+- **混雑制御（Congestion Control）**: DROP（混雑時に破棄）
+- **優先度**: DATA_LOW（バックグラウンド）
+- **信頼性**: ベストエフォート
 
 ```cpp
 QoSProfile::Perception
 ```
 
-## Network Configuration
+## ネットワーク設定
 
-### Peer Mode
+### ピアモード（Peer Mode）
 
-LARCS uses Zenoh in **peer mode** by default, which means:
-- All nodes are equal (no central broker required)
-- Automatic peer discovery via multicast
-- Scales from single machine to distributed systems
+LARCS はデフォルトで Zenoh の **ピアモード** を使用します。
 
-### Multicast Scouting
+- すべてのノードが対等（中央ブローカー不要）
+- マルチキャストによる自動ピア検出
+- 1 台のマシンから分散システムまでスケール
 
-Zenoh peers discover each other automatically using UDP multicast on the local network:
-- **Multicast Address**: 224.0.0.224:7447 (default)
-- **Discovery**: Automatic, zero configuration
-- **Works**: Same machine, same LAN, same subnet
+### マルチキャスト・スカウティング
 
-## Usage
+Zenoh のピアはローカルネットワーク上で UDP マルチキャストにより自動的に相互発見します。
+
+- **マルチキャストアドレス**: 224.0.0.224:7447（デフォルト）
+- **発見**: 自動・ゼロコンフィグ
+- **動作範囲**: 同一マシン / 同一 LAN / 同一サブネット
+
+## 使い方
 
 ### C++ API
 
-#### Publisher Example
+#### Publisher 例
 
 ```cpp
 #include "larcs/runtime/publisher.hpp"
@@ -119,7 +121,7 @@ cmd.mutable_angular()->set_z(0.3);
 pub->publish(cmd);
 ```
 
-#### Subscriber Example
+#### Subscriber 例
 
 ```cpp
 #include "larcs/runtime/subscriber.hpp"
@@ -142,13 +144,13 @@ while (true) {
 }
 ```
 
-### CLI Tools
+### CLI ツール
 
-LARCS provides command-line tools for testing and debugging:
+LARCS はテスト・デバッグ用にコマンドラインツールも提供します。
 
 #### larcs-pub
 
-Publish a message to a topic:
+トピックへメッセージを publish します。
 
 ```bash
 # Publish Twist message
@@ -163,7 +165,7 @@ Publish a message to a topic:
 
 #### larcs-sub
 
-Subscribe to messages from a topic:
+トピックからメッセージを subscribe します。
 
 ```bash
 # Subscribe to Twist messages (unlimited)
@@ -176,126 +178,127 @@ Subscribe to messages from a topic:
 ./build/default/tools/larcs-sub /pose -t Pose -v
 ```
 
-## Testing Communication
+## 通信のテスト
 
-### Single Machine Test
+### 単一マシンでのテスト
 
-In one terminal:
+ターミナル1:
 ```bash
 ./build/default/tools/larcs-sub /test/twist -t Twist
 ```
 
-In another terminal:
+ターミナル2:
 ```bash
 ./build/default/tools/larcs-pub /test/twist '{"linear":{"x":1.5},"angular":{"z":0.5}}' -t Twist
 ```
 
-You should see the message printed in the subscriber terminal.
+subscriber 側にメッセージが表示されれば OK です。
 
-### Multi-Process Test
+### マルチプロセスでのテスト
 
-The same test works across different processes automatically thanks to Zenoh's automatic discovery.
+Zenoh の自動検出により、プロセスが別でも同じ手順でそのまま動作します。
 
-### Multi-Machine Test
+### マルチマシンでのテスト
 
-On Machine A:
+マシンA:
 ```bash
 ./build/default/tools/larcs-sub /robot/cmd_vel -t Twist
 ```
 
-On Machine B (same network):
+マシンB（同一ネットワーク）:
 ```bash
 ./build/default/tools/larcs-pub /robot/cmd_vel '{"linear":{"x":1.0}}' -t Twist
 ```
 
-Messages are automatically routed between machines.
+メッセージは自動的にルーティングされます。
 
-## Troubleshooting
+## トラブルシューティング
 
-### No Messages Received
+### メッセージが受信できない
 
-1. **Check Firewall**: Ensure UDP multicast is allowed
+1. **ファイアウォール確認**: UDP マルチキャストを許可
    ```bash
    # Ubuntu/Debian
    sudo ufw allow proto udp to 224.0.0.0/4
    ```
 
-2. **Check Multicast Routes**: Verify multicast routing is enabled
+2. **マルチキャストルート確認**: マルチキャストのルーティングが有効か確認
    ```bash
    ip route show | grep 224
    # Should show: 224.0.0.0/4 dev <interface> ...
    ```
 
-3. **Add Multicast Route** (if missing):
+3. **マルチキャストルート追加**（無い場合）:
    ```bash
    sudo ip route add 224.0.0.0/4 dev eth0  # or your network interface
    ```
 
-### High Latency
+### レイテンシが高い
 
-- Use `QoSProfile::Control` for time-critical messages
-- Check network congestion
-- Ensure sufficient CPU resources
+- 時間クリティカルなメッセージは `QoSProfile::Control` を使う
+- ネットワーク混雑を確認
+- CPU リソースが足りているか確認
 
-### Messages Dropped
+### メッセージがドロップされる
 
-- Check if `QoSProfile::Telemetry` or `Perception` is appropriate
-- For critical messages, use `QoSProfile::Control`
-- Monitor network bandwidth
+- `QoSProfile::Telemetry` / `Perception` が用途に合っているか確認
+- 重要なメッセージは `QoSProfile::Control` を使う
+- 帯域をモニタリング
 
-### Discovery Issues
+### Discovery（自動検出）がうまくいかない
 
-1. **Same Subnet**: Ensure machines are on the same subnet
-2. **VPN Issues**: Some VPNs block multicast
-3. **Docker/VM**: May need special network configuration
+1. **同じサブネット**: 同一サブネット上か確認
+2. **VPN の影響**: VPN によりマルチキャストがブロックされることがある
+3. **Docker/VM**: ネットワーク設定が必要になる場合がある
 
-### Enable Debug Logging
+### デバッグログを有効化
 
 ```cpp
 #include <spdlog/spdlog.h>
 spdlog::set_level(spdlog::level::debug);
 ```
 
-Or use the `-v` flag with CLI tools:
+あるいは CLI ツールの `-v` オプション:
+
 ```bash
 ./build/default/tools/larcs-sub /topic -t Twist -v
 ```
 
-## Performance Characteristics
+## パフォーマンス特性
 
-### Latency
-- Local (same process): < 1 μs
-- Inter-process (same machine): < 100 μs
-- Network (LAN): < 1 ms
+### レイテンシ
+- ローカル（同一プロセス）: < 1 μs
+- プロセス間（同一マシン）: < 100 μs
+- ネットワーク（LAN）: < 1 ms
 
-### Throughput
-- Small messages (< 1 KB): > 100k msg/s
-- Large messages (> 1 MB): Limited by network bandwidth
+### スループット
+- 小さいメッセージ（< 1 KB）: > 100k msg/s
+- 大きいメッセージ（> 1 MB）: ネットワーク帯域がボトルネック
 
-### Discovery Time
-- Local network: < 100 ms
-- Cross-subnet: Depends on router configuration
+### Discovery 時間
+- ローカルネットワーク: < 100 ms
+- サブネット越え: ルータ設定に依存
 
-## Integration with LARCS
+## LARCS との統合
 
-### Simulation Mode
-Transport works identically in simulation and real modes.
+### シミュレーションモード
+トランスポートはシミュレーションでも実機でも同一に動作します。
 
-### Real Robot Mode
-Same API, zero code changes needed.
+### 実機ロボットモード
+同じ API のまま、コード変更なしで動作します。
 
-### Monitor Mode
-CLI tools and custom monitors can observe all traffic.
+### 監視（Monitor）モード
+CLI ツールや独自モニタにより、すべてのトラフィックを観測できます。
 
-## Future Extensions
+## 将来拡張
 
-Planned for future phases:
-- **Service/Client RPC**: Request-response patterns
-- **Recorder/Replayer**: Integration with MCAP format
-- **Network Statistics**: Latency, loss, bandwidth monitoring
-- **Advanced Routing**: Custom routing policies
+今後のフェーズで計画している内容:
+- **Service/Client RPC**: リクエスト・レスポンス
+- **Recorder/Replayer**: MCAP 形式との統合
+- **ネットワーク統計**: レイテンシ、ロス、帯域監視
+- **高度なルーティング**: カスタムルーティングポリシー
 
-## References
+## 参考資料
 
 - [Zenoh Documentation](https://zenoh.io/docs/)
 - [Zenoh GitHub](https://github.com/eclipse-zenoh/zenoh)
