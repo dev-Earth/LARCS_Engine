@@ -23,3 +23,25 @@ larcs_add_executable(larcs-replay
     fmt::fmt
     CLI11::CLI11
 )
+
+# Pub tool
+larcs_add_executable(larcs-pub
+  SOURCES src/pub.cpp
+  DEPENDENCIES
+    larcs-runtime
+    larcs-msgs
+    fmt::fmt
+    CLI11::CLI11
+    spdlog::spdlog
+)
+
+# Sub tool
+larcs_add_executable(larcs-sub
+  SOURCES src/sub.cpp
+  DEPENDENCIES
+    larcs-runtime
+    larcs-msgs
+    fmt::fmt
+    CLI11::CLI11
+    spdlog::spdlog
+)

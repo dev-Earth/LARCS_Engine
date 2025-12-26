@@ -21,18 +21,21 @@ LARCS Engine provides a lightweight, high-performance foundation for building au
 
 ## Features
 
-### Current (Rev.0)
+### Current (Rev.1)
 - ✅ Time management (monotonic and system time)
 - ✅ Structured logging with spdlog
 - ✅ Protocol buffer message definitions
-- ✅ Publisher/Subscriber skeleton
-- ✅ CLI tools (ping, record, replay)
+- ✅ Zenoh-based pub/sub transport
+- ✅ Publisher/Subscriber with QoS profiles
+- ✅ CLI tools (pub, sub, ping, record, replay)
 - ✅ CMake preset integration
 - ✅ Unit testing framework
+- ✅ Auto-discovery across processes and machines
 
 ### Planned (Future Revisions)
-- Network transport layer (UDP/TCP)
-- Distributed node architecture  
+- Service/Client RPC patterns
+- Message recording/replay with MCAP
+- Network statistics and monitoring
 - Hardware abstraction layer
 - Path planning and navigation
 - Sensor fusion and localization
@@ -45,6 +48,7 @@ LARCS Engine provides a lightweight, high-performance foundation for building au
 - GCC 13+ or Clang 17+
 - CMake 3.25+
 - vcpkg (installed below)
+- Rust toolchain (for building Zenoh)
 
 ### Installation
 
@@ -54,7 +58,27 @@ sudo apt update
 sudo apt install -y build-essential cmake ninja-build git curl zip unzip tar
 ```
 
-2. **Install vcpkg**
+2. **Install Rust (for Zenoh)**
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source "$HOME/.cargo/env"
+```
+
+3. **Install Zenoh**
+```bash
+# Download and build Zenoh C library
+ZENOH_VERSION=1.7.1
+curl -L https://github.com/eclipse-zenoh/zenoh-c/archive/refs/tags/${ZENOH_VERSION}.tar.gz | tar xz
+cd zenoh-c-${ZENOH_VERSION}
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make -j$(nproc)
+sudo make install
+sudo ldconfig
+cd ../..
+```
+
+4. **Install vcpkg**
 ```bash
 cd ~
 git clone https://github.com/microsoft/vcpkg.git
@@ -64,7 +88,7 @@ export VCPKG_ROOT=~/vcpkg
 export PATH=$VCPKG_ROOT:$PATH
 ```
 
-3. **Clone and Build**
+5. **Clone and Build**
 ```bash
 git clone https://github.com/dev-Earth/LARCS_Engine.git
 cd LARCS_Engine
@@ -72,7 +96,7 @@ cmake --preset default
 cmake --build build/default
 ```
 
-4. **Run Tests**
+6. **Run Tests**
 ```bash
 cd build/default
 ctest --output-on-failure
@@ -83,6 +107,17 @@ ctest --output-on-failure
 After building, try the tools:
 
 ```bash
+# Pub/Sub communication
+./build/default/tools/larcs-pub --help
+./build/default/tools/larcs-sub --help
+
+# Example: Publish and subscribe to messages
+# Terminal 1:
+./build/default/tools/larcs-sub /test/twist -t Twist
+
+# Terminal 2:
+./build/default/tools/larcs-pub /test/twist '{"linear":{"x":1.5},"angular":{"z":0.5}}' -t Twist
+
 # Network connectivity test
 ./build/default/tools/larcs-ping --help
 ./build/default/tools/larcs-ping -h 127.0.0.1 -p 8888 -c 4
@@ -141,6 +176,29 @@ Managed via vcpkg:
 - **protobuf**: Message serialization
 - **CLI11**: Command-line parsing
 - **gtest**: Testing framework
+- **zenoh-c**: High-performance pub/sub communication
+
+## Communication Layer
+
+LARCS uses [Zenoh](https://zenoh.io/) for inter-process and network communication:
+- **Auto Discovery**: Zero configuration peer discovery
+- **High Performance**: Sub-millisecond latency
+- **ROS Independent**: Works without ROS infrastructure
+- **Flexible**: Same code for local and distributed systems
+
+See [docs/transport.md](docs/transport.md) for detailed documentation.
+
+### Quick Test
+
+After building, test the pub/sub system:
+
+```bash
+# Terminal 1: Subscribe
+./build/default/tools/larcs-sub /test/twist -t Twist
+
+# Terminal 2: Publish
+./build/default/tools/larcs-pub /test/twist '{"linear":{"x":1.5},"angular":{"z":0.5}}' -t Twist
+```
 
 ## CLion Setup
 
@@ -221,22 +279,24 @@ run-clang-tidy
 
 - [Architecture Overview](docs/architecture.md) - System design and components
 - [Message Specifications](docs/messaging.md) - Protocol buffer message details
+- [Transport Layer](docs/transport.md) - Zenoh communication system
 - [Setup Guide](docs/setup.md) - Detailed installation and configuration
 
 ## Roadmap
 
-### Rev.0 (Current) - Foundation
+### Rev.0 - Foundation ✅
 - ✅ Basic project structure
 - ✅ Build system with vcpkg
 - ✅ Time and logging utilities
 - ✅ Message definitions
 - ✅ CLI tools skeleton
 
-### Rev.1 - Communication
-- Network transport implementation
-- Complete pub/sub system
-- Message recording/replay
-- Multi-node support
+### Rev.1 - Communication (Current) ✅
+- ✅ Zenoh transport implementation
+- ✅ Complete pub/sub system with QoS
+- ✅ CLI pub/sub tools
+- ✅ Multi-node auto-discovery
+- ⏳ Message recording/replay (planned)
 
 ### Rev.2 - Robot Control
 - Trajectory execution

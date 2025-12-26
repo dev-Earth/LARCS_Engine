@@ -40,13 +40,46 @@ jobs:
           tar \
           pkg-config \
           clang-format \
-          clang-tidy
+          clang-tidy \
+          libclang-dev
         
         # Install specific compilers if needed
         if [ "${{ matrix.compiler.name }}" = "gcc" ]; then
           sudo apt-get install -y gcc-13 g++-13
         elif [ "${{ matrix.compiler.name }}" = "clang" ]; then
           sudo apt-get install -y clang-17
+        fi
+
+    - name: Install Rust (for Zenoh)
+      run: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        source "$HOME/.cargo/env"
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+    - name: Cache Zenoh Build
+      uses: actions/cache@v4
+      with:
+        path: |
+          /tmp/zenoh-c-*
+          /usr/local/lib/libzenohc.*
+          /usr/local/include/zenoh.h
+        key: ${{ runner.os }}-zenoh-1.7.1
+
+    - name: Build and Install Zenoh
+      run: |
+        if [ -f /usr/local/lib/libzenohc.so ]; then
+          echo "Zenoh already installed from cache"
+        else
+          source "$HOME/.cargo/env"
+          ZENOH_VERSION=1.7.1
+          cd /tmp
+          curl -L https://github.com/eclipse-zenoh/zenoh-c/archive/refs/tags/${ZENOH_VERSION}.tar.gz | tar xz
+          cd zenoh-c-${ZENOH_VERSION}
+          mkdir build && cd build
+          cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
+          make -j$(nproc)
+          sudo make install
+          sudo ldconfig
         fi
 
     - name: Setup vcpkg
