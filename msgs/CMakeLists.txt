@@ -12,17 +12,6 @@ set(PROTO_FILES
 set(PROTO_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 file(MAKE_DIRECTORY "${PROTO_BINARY_DIR}/larcs/msgs")
 
-# Create list to hold generated sources
-set(PROTO_SRCS)
-set(PROTO_HDRS)
-
-# Generate protobuf files
-foreach(PROTO_FILE ${PROTO_FILES})
-  get_filename_component(PROTO_NAME ${PROTO_FILE} NAME_WE)
-  list(APPEND PROTO_SRCS "${PROTO_BINARY_DIR}/larcs/msgs/${PROTO_NAME}.pb.cc")
-  list(APPEND PROTO_HDRS "${PROTO_BINARY_DIR}/larcs/msgs/${PROTO_NAME}.pb.h")
-endforeach()
-
 # Generate the protobuf sources
 protobuf_generate_cpp(PROTO_GENERATED_SRCS PROTO_GENERATED_HDRS
   ${PROTO_FILES}

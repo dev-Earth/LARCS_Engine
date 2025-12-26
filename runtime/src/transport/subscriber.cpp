@@ -52,6 +52,7 @@ Subscriber<MessageT>::Subscriber(std::shared_ptr<ZenohTransport> transport,
   z_closure(&closure, zenoh_callback, drop_callback, context);
 
   // Declare subscriber
+  // Note: nullptr for options uses default subscriber options
   z_result_t result = z_declare_subscriber(z_loan(transport_->session()), &subscriber_,
                                            z_loan(keyexpr), z_move(closure), nullptr);
 
