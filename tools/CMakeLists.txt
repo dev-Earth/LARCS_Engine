@@ -12,16 +12,22 @@ larcs_add_executable(larcs-ping
 larcs_add_executable(larcs-record
   SOURCES src/record.cpp
   DEPENDENCIES
+    larcs-runtime
+    larcs-msgs
     fmt::fmt
     CLI11::CLI11
+    spdlog::spdlog
 )
 
 # Replay tool
 larcs_add_executable(larcs-replay
   SOURCES src/replay.cpp
   DEPENDENCIES
+    larcs-runtime
+    larcs-msgs
     fmt::fmt
     CLI11::CLI11
+    spdlog::spdlog
 )
 
 # Pub tool

@@ -6,6 +6,7 @@ set(PROTO_FILES
   proto/geometry.proto
   proto/control.proto
   proto/health.proto
+  proto/esp32.proto
 )
 
 # Set up the output directory for generated files
