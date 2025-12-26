@@ -8,7 +8,9 @@
     "spdlog",
     "protobuf",
     "cli11",
-    "gtest"
+    "gtest",
+    "mcap",
+    "lz4"
   ],
   "builtin-baseline": "64e1fbee7d9f40eab5d112aaff648c4dcffe9e47"
 }

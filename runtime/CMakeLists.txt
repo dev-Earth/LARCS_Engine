@@ -7,6 +7,10 @@ set(RUNTIME_SOURCES
   src/transport/publisher.cpp
   src/transport/subscriber.cpp
   src/logger.cpp
+  src/logger/recorder.cpp
+  src/logger/replayer.cpp
+  src/serial/serial_port.cpp
+  src/serial/esp32_bridge.cpp
 )
 
 set(RUNTIME_HEADERS
@@ -16,6 +20,10 @@ set(RUNTIME_HEADERS
   include/larcs/runtime/publisher.hpp
   include/larcs/runtime/subscriber.hpp
   include/larcs/runtime/logger.hpp
+  include/larcs/runtime/recorder.hpp
+  include/larcs/runtime/replayer.hpp
+  include/larcs/runtime/serial_port.hpp
+  include/larcs/runtime/esp32_bridge.hpp
 )
 
 # Find Zenoh
@@ -32,6 +40,8 @@ larcs_add_library(larcs-runtime
     zenohc::lib
     protobuf::libprotobuf
     larcs-msgs
+    mcap
+    lz4::lz4
 )
 
 # Tests
