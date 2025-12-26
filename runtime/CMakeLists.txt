@@ -49,6 +49,7 @@ larcs_add_test(transport_test
     larcs-runtime
     GTest::gtest
     GTest::gtest_main
+    zenohc::lib
 )
 
 larcs_add_test(pubsub_test
@@ -58,4 +59,5 @@ larcs_add_test(pubsub_test
     larcs-msgs
     GTest::gtest
     GTest::gtest_main
+    zenohc::lib
 )
