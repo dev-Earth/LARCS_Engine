@@ -16,11 +16,11 @@ public:
   void close();
   bool is_open() const;
   
-  // 同期送受信
+  // Synchronous send/receive
   bool write(const std::vector<uint8_t>& data);
   std::vector<uint8_t> read(size_t max_bytes, int timeout_ms = 100);
   
-  // 非同期受信（コールバック）
+  // Asynchronous receive (callback)
   using ReadCallback = std::function<void(const std::vector<uint8_t>&)>;
   void start_async_read(ReadCallback callback);
   void stop_async_read();

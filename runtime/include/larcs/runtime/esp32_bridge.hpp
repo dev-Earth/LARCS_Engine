@@ -8,7 +8,7 @@
 
 namespace larcs::runtime {
 
-// PC ↔ ESP32 のプロトコル変換
+// PC <-> ESP32 protocol bridge
 class ESP32Bridge {
 public:
   ESP32Bridge(std::shared_ptr<ZenohTransport> transport,
@@ -31,7 +31,7 @@ private:
   std::unique_ptr<SerialPort> serial_;
   std::atomic<bool> running_{false};
   
-  // フレーミング（区切り文字 0x7E + length + payload + CRC）
+  // Framing (delimiter 0x7E + length + payload + CRC)
   std::vector<uint8_t> frame_buffer_;
   static constexpr uint8_t FRAME_START = 0x7E;
 };

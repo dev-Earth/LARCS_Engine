@@ -16,16 +16,16 @@ public:
   void close();
   
   struct ReplayOptions {
-    double rate = 1.0;              // 再生速度倍率
-    bool loop = false;              // ループ再生
-    uint64_t start_time_ns = 0;     // 開始時刻
-    uint64_t end_time_ns = UINT64_MAX;  // 終了時刻
+    double rate = 1.0;              // Playback rate multiplier
+    bool loop = false;              // Loop playback
+    uint64_t start_time_ns = 0;     // Start time
+    uint64_t end_time_ns = UINT64_MAX;  // End time
   };
   
-  // 再生実行（blocking）
+  // Execute replay (blocking)
   bool replay(std::shared_ptr<ZenohTransport> transport, const ReplayOptions& options);
   
-  // ファイル情報取得
+  // Get file information
   struct FileInfo {
     uint64_t start_time_ns;
     uint64_t end_time_ns;
