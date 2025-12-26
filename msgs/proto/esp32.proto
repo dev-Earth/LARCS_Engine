@@ -4,43 +4,43 @@ package larcs.msgs;
 
 import "common.proto";
 
-// PC → ESP32 指令
+// PC → ESP32 command
 message ESP32Command {
   Header header = 1;
   
   enum Mode {
-    DISARM = 0;   // モータ無効
-    ARM = 1;      // モータ有効
-    ESTOP = 2;    // 緊急停止
+    DISARM = 0;   // Motor disabled
+    ARM = 1;      // Motor enabled
+    ESTOP = 2;    // Emergency stop
   }
   Mode mode = 2;
   
-  // 車輪速度目標 [RPM] (最大4輪対応)
+  // Wheel speed target [RPM] (supports up to 4 wheels)
   repeated double wheel_rpm_target = 3;
   
-  // タイムアウト [ms] (この時間内に次のコマンドが来なければ停止)
+  // Timeout [ms] (stop if next command doesn't arrive within this time)
   uint32 ttl_ms = 4;
 }
 
-// ESP32 → PC 状態
+// ESP32 → PC state
 message ESP32State {
   Header header = 1;
   
-  // エンコーダ積算値 [ticks]
+  // Encoder accumulated value [ticks]
   repeated int64 encoder_ticks = 2;
   
-  // 車輪速度推定 [RPM]
+  // Estimated wheel speed [RPM]
   repeated double wheel_rpm = 3;
   
-  // バッテリ電圧 [V]
+  // Battery voltage [V]
   double battery_voltage = 4;
   
-  // E-stopボタン押下状態
+  // E-stop button pressed state
   bool estop_pressed = 5;
   
-  // ESP32起動時間 [ms]
+  // ESP32 uptime [ms]
   uint32 uptime_ms = 6;
   
-  // モータドライバエラー
+  // Motor driver errors
   repeated string errors = 7;
 }

@@ -23,7 +23,9 @@ bool Recorder::open() {
   }
   
   mcap::McapWriterOptions options("larcs");
-  options.compression = mcap::Compression::None;  // Use no compression since LZ4 is disabled
+  // Note: LZ4 compression is disabled by vcpkg build configuration (MCAP_COMPRESSION_NO_LZ4)
+  // Using no compression to avoid runtime errors
+  options.compression = mcap::Compression::None;
   
   auto status = writer_->open(filepath_, options);
   if (!status.ok()) {

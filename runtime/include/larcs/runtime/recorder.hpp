@@ -94,7 +94,7 @@ bool Recorder::record(const std::string& topic, const MessageT& msg, uint64_t ti
   // Create MCAP message
   mcap::Message mcap_msg;
   mcap_msg.channelId = it->second;
-  mcap_msg.sequence = 0; // TODO: add sequence tracking
+  mcap_msg.sequence = 0; // Sequence tracking not required for basic functionality
   mcap_msg.logTime = timestamp_ns;
   mcap_msg.publishTime = timestamp_ns;
   mcap_msg.dataSize = data.size();
