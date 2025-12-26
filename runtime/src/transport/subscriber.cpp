@@ -27,7 +27,7 @@ Subscriber<MessageT>::Subscriber(std::shared_ptr<ZenohTransport> transport,
 
   // Create key expression for the topic
   z_owned_keyexpr_t keyexpr = z_keyexpr_new(topic_.c_str());
-  if (!z_check(keyexpr)) {
+  if (!z_internal_keyexpr_check(&keyexpr)) {
     spdlog::error("Subscriber: failed to create keyexpr for topic: {}", topic_);
     subscriber_ = z_subscriber_null();
     return;
@@ -45,14 +45,15 @@ Subscriber<MessageT>::Subscriber(std::shared_ptr<ZenohTransport> transport,
   z_owned_closure_sample_t closure = z_closure(zenoh_callback, drop_callback, context);
 
   // Declare subscriber
-  subscriber_ = z_declare_subscriber(z_loan(transport_->session()),
-                                     z_loan(keyexpr), z_move(closure), nullptr);
+  z_result_t result = z_declare_subscriber(&subscriber_, z_loan(transport_->session()),
+                                           z_loan(keyexpr), z_move(closure), nullptr);
 
   z_drop(z_move(keyexpr));
 
-  if (!z_check(subscriber_)) {
+  if (result != Z_OK) {
     spdlog::error("Subscriber: failed to declare subscriber for topic: {}",
                   topic_);
+    subscriber_ = z_subscriber_null();
     delete context;
   } else {
     spdlog::debug("Subscriber created for topic: {}", topic_);
@@ -61,7 +62,7 @@ Subscriber<MessageT>::Subscriber(std::shared_ptr<ZenohTransport> transport,
 
 template <typename MessageT>
 Subscriber<MessageT>::~Subscriber() {
-  if (z_check(subscriber_)) {
+  if (z_internal_subscriber_check(&subscriber_)) {
     z_undeclare_subscriber(z_move(subscriber_));
     spdlog::debug("Subscriber destroyed for topic: {}", topic_);
   }
