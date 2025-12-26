@@ -31,4 +31,6 @@ enable_testing()
 # Add subdirectories
 add_subdirectory(msgs)
 add_subdirectory(runtime)
+add_subdirectory(sim)
 add_subdirectory(tools)
+add_subdirectory(apps)

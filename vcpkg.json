@@ -10,7 +10,9 @@
     "cli11",
     "gtest",
     "mcap",
-    "lz4"
+    "lz4",
+    "eigen3",
+    "yaml-cpp"
   ],
   "builtin-baseline": "64e1fbee7d9f40eab5d112aaff648c4dcffe9e47"
 }
