@@ -23,7 +23,11 @@
     <configurations />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="292e7d30-c118-4890-9a09-e1445d415832" name="変更" comment="all delete" />
+    <list default="true" id="292e7d30-c118-4890-9a09-e1445d415832" name="変更" comment="all delete">
+      <change afterPath="$PROJECT_DIR$/リファレンス.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/editor.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -61,7 +65,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/dev-Earth/LARCS_Engine.git&quot;,
-    &quot;accountId&quot;: &quot;5b3122ea-aeac-4149-8e20-7f65192865ea&quot;
+    &quot;accountId&quot;: &quot;349b01a7-08f7-4ef9-abe8-0503c1be457e&quot;
   }
 }</component>
   <component name="MacroExpansionManager">
@@ -96,13 +100,18 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "/home/earth/LARCS_Engine",
+    "last_opened_file_path": "/home/earth/CLionProjects/LARCS_Engine",
     "nodejs_package_manager_path": "npm",
     "org.rust.first.attach.projects": "true",
     "settings.editor.selected.configurable": "CMakeSettings",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
@@ -121,6 +130,8 @@
       <workItem from="1766686733096" duration="954000" />
       <workItem from="1766687764662" duration="16418000" />
       <workItem from="1766773968841" duration="2250000" />
+      <workItem from="1767065055950" duration="42000" />
+      <workItem from="1767065116706" duration="369000" />
     </task>
     <task id="LOCAL-00001" summary="first commit">
       <option name="closed" value="true" />
